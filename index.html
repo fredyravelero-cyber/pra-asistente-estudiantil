@@ -6,7 +6,7 @@
     <title>PRA Asistente Estudiantil</title>
     
     <style>
-        /* --- VARIABLES Y ESTILOS GENERALES --- */
+        /* --- ESTILOS GENERALES Y VARIABLES --- */
         :root {
             --pra-blue: #0D47A1;
             --pra-lightblue: #42A5F5;
@@ -125,21 +125,27 @@
             font-weight: 500;
         }
 
-        /* NUEVO: Estilos para la tarjeta de cuidado personal */
-        .personal-care-card ul {
+        /* Estilos para las tarjetas de tips */
+        .tips-card ul {
             list-style: none;
             padding: 0;
         }
-        .personal-care-card li {
-            margin-bottom: 10px;
-            padding-left: 20px;
+        .tips-card li {
+            margin-bottom: 12px;
+            padding-left: 25px;
             position: relative;
+            line-height: 1.4;
         }
-        .personal-care-card li::before {
-            content: '✨';
+        .tips-card li::before {
+            content: '✨'; /* Puedes cambiar el emoji aquí */
             position: absolute;
             left: 0;
+            top: 0;
         }
+        /* Emojis específicos por tarjeta */
+        .moda-card li::before { content: '👗'; }
+        .salud-card li::before { content: '🍎'; }
+
 
         .pomodoro-card { text-align: center; }
         #pomodoro-time { font-size: 4rem; font-weight: 600; margin: 15px 0; }
@@ -156,10 +162,9 @@
         .materia-cell.view-mode .materia-display { display: block; font-weight: 500; }
         .materia-display .materia-time { font-size: 0.85rem; color: #555; display: block; }
         
-        /* AJUSTADO: Formulario de tareas */
         #add-tarea-form {
             display: grid;
-            grid-template-columns: 1fr auto auto; /* Columnas flexibles para inputs y fijas para botón */
+            grid-template-columns: 1fr auto auto;
             gap: 15px;
             margin-bottom: 25px;
             align-items: center;
@@ -170,44 +175,39 @@
             border-radius: 6px;
             font-size: 1rem;
         }
-        #task-file {
-            /* Estilo básico para el input de archivo */
-            padding: 9px;
-            font-size: 0.9rem;
-        }
+        #task-file { padding: 9px; font-size: 0.9rem; }
 
         #lista-tareas { list-style: none; padding: 0; }
         #lista-tareas li {
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            border-left: 5px solid var(--pra-lightblue);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 15px; background-color: #f9f9f9; border-radius: 6px;
+            margin-bottom: 10px; border-left: 5px solid var(--pra-lightblue);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
         }
-        .task-details {
-            display: flex;
-            flex-direction: column; /* Apila la descripción, fecha y archivo */
-        }
-        .task-description {
-            font-weight: 600;
-        }
+        .task-details { display: flex; flex-direction: column; flex-grow: 1; margin-right: 15px; }
+        .task-description { font-weight: 600; }
         .task-date { font-size: 0.9rem; color: #555; }
-        /* NUEVO: Estilo para el nombre del archivo adjunto */
-        .task-file-info {
-            font-size: 0.85rem;
-            color: var(--pra-blue);
-            font-style: italic;
-            margin-top: 5px;
-        }
+        .task-actions { display: flex; align-items: center; margin-top: 10px; } /* Contenedor para botones de tarea */
+        .task-file-info { font-size: 0.85rem; color: var(--pra-blue); font-style: italic; margin-right: 15px; } /* Mover a la izquierda */
         
         .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
         .btn-primary { background-color: var(--pra-lightblue); color: var(--text-light); }
         .btn-edit { background-color: var(--warning); color: var(--text-light); }
-        .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; margin-left: 15px; }
+        .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; }
         .btn-add-row { background-color: var(--success); color: white; }
+        .btn-open-folder { background-color: #607D8B; color: white; padding: 8px 12px; } /* Nuevo botón */
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { padding: 20px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            #add-tarea-form { grid-template-columns: 1fr; }
+            .btn { width: 100%; margin-top: 10px; margin-right: 0; }
+            #lista-tareas li { flex-direction: column; align-items: flex-start; }
+            .task-actions { margin-left: 0; margin-top: 10px; width: 100%; justify-content: flex-end; }
+            .task-file-info { margin-bottom: 10px; margin-right: 0; }
+        }
     </style>
 </head>
 <body>
@@ -233,48 +233,37 @@
                 <div class="dashboard-grid">
                     <div class="card quote-card">
                         <h3>Dosis de Motivación</h3>
-                        <blockquote id="motivational-quote">El éxito es la suma de pequeños esfuerzos repetidos día tras día.</blockquote>
-                        <cite id="quote-author">- Robert Collier</cite>
+                        <blockquote id="motivational-quote"></blockquote>
+                        <cite id="quote-author"></cite>
                     </div>
-                    <div class="card personal-care-card">
-                        <h3>Tip del Día: Bienestar</h3>
-                        <ul>
-                            <li>Recuerda tomar suficiente agua durante el día.</li>
-                            <li>Una caminata corta puede mejorar tu concentración.</li>
-                            <li>Organiza tu ropa para la mañana siguiente y ahorra tiempo.</li>
-                        </ul>
+                    
+                    <div class="card tips-card personal-care-card">
+                        <h3>Tips de Cuidado Personal</h3>
+                        <ul id="personal-care-list"></ul>
+                    </div>
+
+                    <div class="card tips-card moda-card">
+                        <h3>Tips de Moda y Estilo</h3>
+                        <ul id="fashion-tips-list"></ul>
+                    </div>
+
+                    <div class="card tips-card salud-card">
+                        <h3>Tips de Salud y Alimentación</h3>
+                        <ul id="health-tips-list"></ul>
                     </div>
                 </div>
             </section>
 
-            <section id="horario" class="content-section">
-                </section>
-
-            <section id="tareas" class="content-section">
-                <h2 class="page-header">Tareas Pendientes</h2>
-                <form id="add-tarea-form">
-                    <input type="text" id="task-description" placeholder="Descripción de la tarea..." required>
-                    <input type="date" id="task-date" required>
-                    <input type="file" id="task-file">
-                    <button type="submit" class="btn btn-primary">Agregar</button>
-                </form>
-                <ul id="lista-tareas"></ul>
-            </section>
-
-            <section id="pomodoro" class="content-section">
-                </section>
-
-            <section id="notas" class="content-section">
-                </section>
+            <section id="horario" class="content-section"></section>
+            <section id="tareas" class="content-section"></section>
+            <section id="pomodoro" class="content-section"></section>
+            <section id="notas" class="content-section"></section>
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Carga de la estructura de la app (para no repetir HTML)
             loadStaticContent();
-            
-            // --- INICIALIZACIÓN DE LA APLICACIÓN ---
             document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
             
             initDashboard();
@@ -286,32 +275,110 @@
             loadTasks();
         });
 
-        // --- LÓGICA DE NAVEGACIÓN ---
-        function handleNavClick(e) {
-            e.preventDefault();
-            const targetId = e.currentTarget.getAttribute('href').substring(1);
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            e.currentTarget.classList.add('active');
+        // --- LÓGICA DEL DASHBOARD (CONTENIDO ALEATORIO Y NUEVAS SECCIONES) ---
+        function initDashboard() {
+            // Biblioteca de Frases Motivacionales
+            const motivationalQuotes = [
+                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
+                { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" },
+                { text: "No tienes que ser grande para empezar, pero tienes que empezar para ser grande.", author: "Zig Ziglar" },
+                { text: "El secreto para salir adelante es empezar.", author: "Mark Twain" },
+                { text: "Cree que puedes y ya estás a medio camino.", author: "Theodore Roosevelt" },
+                { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" },
+                { text: "La mejor forma de predecir el futuro es crearlo.", author: "Peter Drucker" }
+            ];
+
+            // Biblioteca de Tips de Cuidado Personal (Más expandida)
+            const personalCareTips = [
+                "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.",
+                "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.",
+                "Tómate 5 minutos para estirarte entre largas sesiones de estudio. Tu espalda te lo agradecerá.",
+                "Asegúrate de dormir entre 7 y 9 horas. Un buen descanso es clave para aprender.",
+                "Limpia tu rostro cada noche para mantener tu piel sana y fresca.",
+                "Dedica 15 minutos al día a organizar tu espacio de estudio. Un lugar ordenado ayuda a una mente ordenada.",
+                "Practica la respiración profunda por unos minutos para reducir el estrés.",
+                "Establece una rutina de sueño. Acostarte y levantarte a la misma hora mejora tu energía.",
+                "Usa bloqueador solar, incluso en días nublados o si pasas mucho tiempo cerca de ventanas.",
+                "Tómate un descanso de las pantallas cada 20-30 minutos para cuidar tu vista."
+            ];
+
+            // Biblioteca de Tips de Moda y Estilo (Nueva)
+            const fashionTips = [
+                "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.",
+                "Asegúrate de que tu ropa te quede bien. El ajuste es clave para un buen estilo.",
+                "Usa accesorios para darle un toque diferente a un outfit simple: un reloj, un cinturón o un collar.",
+                "Limpia y cuida tus zapatos; son una parte importante de tu imagen.",
+                "Mezcla texturas en tus atuendos para añadir interés visual (ej. un suéter de punto con jeans).",
+                "Ten siempre un 'look comodín' listo para esos días sin inspiración: jeans, camiseta, blazer.",
+                "No subestimes el poder de una buena plancha o vaporizador para tu ropa."
+            ];
+
+            // Biblioteca de Tips de Salud y Alimentación (Nueva)
+            const healthTips = [
+                "Una manzana es un snack energético y saludable, ideal para media tarde.",
+                "Intenta comer al menos 5 porciones de frutas y verduras al día.",
+                "Para dolores de cabeza leves, asegúrate de estar bien hidratado antes de recurrir a medicamentos.",
+                "Si pasas mucho tiempo sentado, levántate y camina un poco cada hora para activar la circulación.",
+                "Sustituye las bebidas azucaradas por agua o infusiones naturales.",
+                "Para la fatiga, prioriza alimentos ricos en hierro como espinacas o lentejas.",
+                "Escucha a tu cuerpo: si tienes dolor, no lo ignores. Descansa y, si persiste, consulta a un médico.",
+                "Evita cenar muy pesado antes de dormir para mejorar la calidad de tu sueño.",
+                "Un puñado de nueces o almendras es perfecto para satisfacer el hambre entre comidas."
+            ];
+
+
+            // --- Lógica para seleccionar y mostrar contenido aleatorio ---
+
+            // 1. Dosis de Motivación
+            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+            document.getElementById('motivational-quote').textContent = randomQuote.text;
+            document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
+
+            // 2. Tips de Cuidado Personal (seleccionamos 3 diferentes)
+            renderRandomTips('personal-care-list', personalCareTips, 3);
+
+            // 3. Tips de Moda y Estilo (seleccionamos 3 diferentes)
+            renderRandomTips('fashion-tips-list', fashionTips, 3);
+
+            // 4. Tips de Salud y Alimentación (seleccionamos 3 diferentes)
+            renderRandomTips('health-tips-list', healthTips, 3);
         }
 
-        // --- LÓGICA DE TAREAS PENDIENTES (ACTUALIZADA) ---
+        // Función auxiliar para renderizar tips aleatorios
+        function renderRandomTips(elementId, tipsArray, count) {
+            const listElement = document.getElementById(elementId);
+            listElement.innerHTML = '';
+            const shuffledTips = tipsArray.sort(() => 0.5 - Math.random());
+            const selectedTips = shuffledTips.slice(0, count);
+            selectedTips.forEach(tipText => {
+                const listItem = document.createElement('li');
+                listItem.textContent = tipText;
+                listElement.appendChild(listItem);
+            });
+        }
+
+
+        // --- LÓGICA DE NAVEGACIÓN Y OTRAS FUNCIONES (ACTUALIZADAS PARA ARCHIVOS) ---
+        function handleNavClick(e) { e.preventDefault(); const targetId = e.currentTarget.getAttribute('href').substring(1); document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(targetId).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); e.currentTarget.classList.add('active'); }
+        
         function setupTaskListeners() {
             document.getElementById('add-tarea-form').addEventListener('submit', addTask);
-            document.getElementById('lista-tareas').addEventListener('click', deleteTask);
+            // Delegamos el evento de clic a la lista de tareas para botones dinámicos
+            document.getElementById('lista-tareas').addEventListener('click', handleTaskActions); 
         }
 
-        function loadTasks() {
-            renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []);
+        function handleTaskActions(event) {
+            if (event.target.matches('.btn-delete')) {
+                deleteTask(event);
+            } else if (event.target.matches('.btn-open-folder')) {
+                openFileLocation(event);
+            }
         }
 
-        function saveTasks(tasks) {
-            localStorage.setItem('myTasks', JSON.stringify(tasks));
-            renderTasks(tasks);
-        }
+        function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
+        function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
         
-        // FUNCIÓN ACTUALIZADA para mostrar el nombre del archivo
+        // FUNCIÓN ACTUALIZADA para mostrar el botón "Abrir Carpeta"
         function renderTasks(tasks) {
             const taskList = document.getElementById('lista-tareas');
             taskList.innerHTML = '';
@@ -333,12 +400,22 @@
                 taskDetails.appendChild(taskDesc);
                 taskDetails.appendChild(taskDate);
 
-                // Si la tarea tiene un nombre de archivo, lo mostramos
+                // Contenedor para los botones de la tarea
+                const taskActions = document.createElement('div');
+                taskActions.className = 'task-actions';
+
+                // Si la tarea tiene un nombre de archivo, mostramos su info y el botón "Abrir Carpeta"
                 if (task.fileName) {
                     const taskFile = document.createElement('span');
                     taskFile.className = 'task-file-info';
                     taskFile.textContent = `📎 Archivo: ${task.fileName}`;
-                    taskDetails.appendChild(taskFile);
+                    taskActions.appendChild(taskFile); // Añadimos al contenedor de acciones
+                    
+                    const openFolderBtn = document.createElement('button');
+                    openFolderBtn.className = 'btn btn-open-folder';
+                    openFolderBtn.textContent = 'Abrir Carpeta';
+                    openFolderBtn.dataset.index = index; // Para saber a qué tarea pertenece
+                    taskActions.appendChild(openFolderBtn);
                 }
 
                 // Botón de eliminar
@@ -346,19 +423,19 @@
                 deleteBtn.className = 'btn btn-delete';
                 deleteBtn.textContent = 'X';
                 deleteBtn.dataset.index = index;
+                taskActions.appendChild(deleteBtn); // Añadimos al contenedor de acciones
 
                 li.appendChild(taskDetails);
-                li.appendChild(deleteBtn);
+                li.appendChild(taskActions); // Añadimos el contenedor de acciones completo
                 taskList.appendChild(li);
             });
         }
         
-        // FUNCIÓN ACTUALIZADA para añadir el nombre del archivo a la tarea
         function addTask(event) {
             event.preventDefault();
             const descriptionInput = document.getElementById('task-description');
             const dateInput = document.getElementById('task-date');
-            const fileInput = document.getElementById('task-file'); // Nuevo
+            const fileInput = document.getElementById('task-file');
 
             const description = descriptionInput.value.trim();
             const date = dateInput.value;
@@ -368,34 +445,49 @@
                 return;
             }
             
-            // Obtenemos el nombre del archivo, si existe
             const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
+            // Opcional: Podrías guardar la ruta completa si el usuario la selecciona de alguna manera
+            // Sin embargo, por seguridad y limitaciones del navegador, la ruta real es inaccesible
+            // Así que solo guardamos el nombre.
+            // La funcionalidad de "Abrir Carpeta" dependerá de la capacidad del sistema operativo.
+            // Para un sitio web, este es el límite.
+            // Para una aplicación de escritorio/Electron, sí se podría hacer.
 
             const tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            tasks.push({ description, date, fileName }); // Guardamos el nuevo objeto
+            tasks.push({ description, date, fileName });
             saveTasks(tasks);
             
-            // Limpiamos el formulario
             event.target.reset();
         }
 
         function deleteTask(event) {
-            if (event.target.matches('.btn-delete')) {
-                const index = parseInt(event.target.dataset.index, 10);
-                let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-                tasks.splice(index, 1);
-                saveTasks(tasks);
+            const index = parseInt(event.target.dataset.index, 10);
+            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+            tasks.splice(index, 1);
+            saveTasks(tasks);
+        }
+
+        function openFileLocation(event) {
+            const index = parseInt(event.target.dataset.index, 10);
+            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+            const task = tasks[index];
+
+            if (task && task.fileName) {
+                // Esta es una LIMITACIÓN CRÍTICA en navegadores web por seguridad.
+                // JavaScript en un navegador NO PUEDE abrir una carpeta local directamente.
+                // No puede acceder a rutas de archivo en el sistema del usuario.
+                
+                // Opción 1 (la única viable en web): Mostrar un mensaje.
+                alert(`Para esta tarea, buscaste el archivo:\n\n"${task.fileName}"\n\nDebes abrir manualmente la carpeta donde lo guardaste.`);
+
+                // Opción 2 (solo funcionaría en entornos de escritorio como Electron, NO en un navegador web):
+                // window.electron.openFileExplorer(task.filePath); // Ejemplo de una API en Electron
+            } else {
+                alert("No hay un archivo adjunto para esta tarea.");
             }
         }
         
-        // --- OTRAS FUNCIONES (sin cambios) ---
-        // (Se incluyen aquí para que el código esté completo y funcional)
-        function initDashboard() {
-            const quotes = [{ text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "No tienes que ser grande para empezar, pero tienes que empezar para ser grande.", author: "Zig Ziglar" }, { text: "El secreto para salir adelante es empezar.", author: "Mark Twain" }];
-            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-            document.getElementById('motivational-quote').textContent = randomQuote.text;
-            document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
-        }
+        // --- RESTO DE FUNCIONES (sin cambios) ---
         let pomodoroInterval; let timeLeft = 1500; let isPaused = true; let isWorkSession = true;
         function initPomodoro() { document.getElementById('pomodoro-start').onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
         function updateTimerDisplay() { const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60; document.getElementById('pomodoro-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; }
@@ -412,8 +504,8 @@
         function addScheduleRow() { const scheduleBody = document.getElementById('schedule-body'); const i = scheduleBody.rows.length; const r = document.createElement('tr'); days.forEach(d => r.appendChild(createScheduleCell(i, d, {}, true))); scheduleBody.appendChild(r); }
         function toggleScheduleButtons(isEditing) { document.getElementById('edit-schedule-btn').classList.toggle('hidden', isEditing); document.getElementById('save-schedule-btn').classList.toggle('hidden', !isEditing); document.getElementById('add-row-btn').classList.toggle('hidden', !isEditing); }
         function loadStaticContent(){
-            // Esta función carga el HTML de las secciones que no cambiaron para no repetirlo en el body
             document.getElementById('horario').innerHTML = `<h2 class="page-header">Mi Horario Semanal</h2><div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div><div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>`;
+            document.getElementById('tareas').innerHTML = `<h2 class="page-header">Tareas Pendientes</h2><form id="add-tarea-form"><input type="text" id="task-description" placeholder="Descripción..." required><input type="date" id="task-date" required><input type="file" id="task-file"><button type="submit" class="btn btn-primary">Agregar</button></form><ul id="lista-tareas"></ul>`;
             document.getElementById('pomodoro').innerHTML = `<h2 class="page-header">Temporizador Pomodoro</h2><div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>`;
             document.getElementById('notas').innerHTML = `<h2 class="page-header">Bloc de Notas y Recursos</h2><div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>`;
         }
