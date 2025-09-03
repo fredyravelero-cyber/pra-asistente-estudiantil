@@ -124,34 +124,29 @@
             margin-top: 10px;
             font-weight: 500;
         }
+
+        /* NUEVO: Estilos para la tarjeta de cuidado personal */
+        .personal-care-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .personal-care-card li {
+            margin-bottom: 10px;
+            padding-left: 20px;
+            position: relative;
+        }
+        .personal-care-card li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+        }
+
         .pomodoro-card { text-align: center; }
-        #pomodoro-time {
-            font-size: 4rem;
-            font-weight: 600;
-            margin: 15px 0;
-        }
-        #quick-notes {
-            width: 100%;
-            height: 200px;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-        }
+        #pomodoro-time { font-size: 4rem; font-weight: 600; margin: 15px 0; }
+        #quick-notes { width: 100%; height: 200px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; resize: vertical; }
         .schedule-table-wrapper { overflow-x: auto; }
-        .schedule-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        .schedule-table th, .schedule-table td {
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            text-align: center;
-            vertical-align: middle;
-        }
+        .schedule-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .schedule-table th, .schedule-table td { border: 1px solid var(--border-color); padding: 8px; text-align: center; vertical-align: middle; }
         .schedule-table th { background-color: var(--background-grey); }
         .materia-cell { padding: 5px; min-height: 60px; }
         .materia-cell input { width: calc(100% - 16px); margin-bottom: 5px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
@@ -160,13 +155,55 @@
         .materia-cell .materia-display { display: none; }
         .materia-cell.view-mode .materia-display { display: block; font-weight: 500; }
         .materia-display .materia-time { font-size: 0.85rem; color: #555; display: block; }
-        #add-tarea-form { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
-        #add-tarea-form input { flex-grow: 1; padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        
+        /* AJUSTADO: Formulario de tareas */
+        #add-tarea-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto; /* Columnas flexibles para inputs y fijas para botón */
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        #add-tarea-form input {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        #task-file {
+            /* Estilo básico para el input de archivo */
+            padding: 9px;
+            font-size: 0.9rem;
+        }
+
         #lista-tareas { list-style: none; padding: 0; }
-        #lista-tareas li { display: flex; justify-content: space-between; align-items: center; padding: 15px; background-color: #f9f9f9; border-radius: 6px; margin-bottom: 10px; border-left: 5px solid var(--pra-lightblue); }
-        .task-info { flex-grow: 1; }
-        .task-date { font-size: 0.9rem; color: #555; margin-left: 15px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
+        #lista-tareas li {
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 5px solid var(--pra-lightblue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-details {
+            display: flex;
+            flex-direction: column; /* Apila la descripción, fecha y archivo */
+        }
+        .task-description {
+            font-weight: 600;
+        }
+        .task-date { font-size: 0.9rem; color: #555; }
+        /* NUEVO: Estilo para el nombre del archivo adjunto */
+        .task-file-info {
+            font-size: 0.85rem;
+            color: var(--pra-blue);
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
         .btn-primary { background-color: var(--pra-lightblue); color: var(--text-light); }
         .btn-edit { background-color: var(--warning); color: var(--text-light); }
         .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; margin-left: 15px; }
@@ -199,63 +236,44 @@
                         <blockquote id="motivational-quote">El éxito es la suma de pequeños esfuerzos repetidos día tras día.</blockquote>
                         <cite id="quote-author">- Robert Collier</cite>
                     </div>
-                    <div class="card welcome-card">
-                        <h3>¡Hola!</h3>
-                        <p>Bienvenido a tu asistente personal. Revisa tus tareas y concéntrate en tus metas de hoy.</p>
+                    <div class="card personal-care-card">
+                        <h3>Tip del Día: Bienestar</h3>
+                        <ul>
+                            <li>Recuerda tomar suficiente agua durante el día.</li>
+                            <li>Una caminata corta puede mejorar tu concentración.</li>
+                            <li>Organiza tu ropa para la mañana siguiente y ahorra tiempo.</li>
+                        </ul>
                     </div>
                 </div>
             </section>
 
             <section id="horario" class="content-section">
-                <h2 class="page-header">Mi Horario Semanal</h2>
-                <div class="schedule-table-wrapper">
-                    <table class="schedule-table">
-                        <thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead>
-                        <tbody id="schedule-body"></tbody>
-                    </table>
-                </div>
-                <div class="schedule-controls">
-                    <button id="edit-schedule-btn" class="btn btn-edit">Modificar Horario</button>
-                    <button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button>
-                    <button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button>
-                </div>
-            </section>
+                </section>
 
             <section id="tareas" class="content-section">
                 <h2 class="page-header">Tareas Pendientes</h2>
                 <form id="add-tarea-form">
                     <input type="text" id="task-description" placeholder="Descripción de la tarea..." required>
                     <input type="date" id="task-date" required>
-                    <button type="submit" class="btn btn-primary">Agregar Tarea</button>
+                    <input type="file" id="task-file">
+                    <button type="submit" class="btn btn-primary">Agregar</button>
                 </form>
                 <ul id="lista-tareas"></ul>
             </section>
 
             <section id="pomodoro" class="content-section">
-                <h2 class="page-header">Temporizador Pomodoro</h2>
-                <div class="card pomodoro-card">
-                    <h3 id="pomodoro-mode">Tiempo de Enfoque</h3>
-                    <div id="pomodoro-time">25:00</div>
-                    <div class="pomodoro-controls">
-                        <button id="pomodoro-start" class="btn btn-primary">Iniciar</button>
-                        <button id="pomodoro-pause" class="btn btn-edit">Pausar</button>
-                        <button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button>
-                    </div>
-                </div>
-            </section>
+                </section>
 
             <section id="notas" class="content-section">
-                <h2 class="page-header">Bloc de Notas y Recursos</h2>
-                <div class="card">
-                    <textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces importantes aquí..."></textarea>
-                    <p id="notes-status"></p>
-                </div>
-            </section>
+                </section>
         </main>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Carga de la estructura de la app (para no repetir HTML)
+            loadStaticContent();
+            
             // --- INICIALIZACIÓN DE LA APLICACIÓN ---
             document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
             
@@ -278,86 +296,127 @@
             e.currentTarget.classList.add('active');
         }
 
-        // --- LÓGICA DEL DASHBOARD ---
+        // --- LÓGICA DE TAREAS PENDIENTES (ACTUALIZADA) ---
+        function setupTaskListeners() {
+            document.getElementById('add-tarea-form').addEventListener('submit', addTask);
+            document.getElementById('lista-tareas').addEventListener('click', deleteTask);
+        }
+
+        function loadTasks() {
+            renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []);
+        }
+
+        function saveTasks(tasks) {
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+            renderTasks(tasks);
+        }
+        
+        // FUNCIÓN ACTUALIZADA para mostrar el nombre del archivo
+        function renderTasks(tasks) {
+            const taskList = document.getElementById('lista-tareas');
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+
+                // Contenedor para la descripción, fecha y archivo
+                const taskDetails = document.createElement('div');
+                taskDetails.className = 'task-details';
+
+                const taskDesc = document.createElement('span');
+                taskDesc.className = 'task-description';
+                taskDesc.textContent = task.description;
+                
+                const taskDate = document.createElement('span');
+                taskDate.className = 'task-date';
+                taskDate.textContent = `Entrega: ${task.date}`;
+
+                taskDetails.appendChild(taskDesc);
+                taskDetails.appendChild(taskDate);
+
+                // Si la tarea tiene un nombre de archivo, lo mostramos
+                if (task.fileName) {
+                    const taskFile = document.createElement('span');
+                    taskFile.className = 'task-file-info';
+                    taskFile.textContent = `📎 Archivo: ${task.fileName}`;
+                    taskDetails.appendChild(taskFile);
+                }
+
+                // Botón de eliminar
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-delete';
+                deleteBtn.textContent = 'X';
+                deleteBtn.dataset.index = index;
+
+                li.appendChild(taskDetails);
+                li.appendChild(deleteBtn);
+                taskList.appendChild(li);
+            });
+        }
+        
+        // FUNCIÓN ACTUALIZADA para añadir el nombre del archivo a la tarea
+        function addTask(event) {
+            event.preventDefault();
+            const descriptionInput = document.getElementById('task-description');
+            const dateInput = document.getElementById('task-date');
+            const fileInput = document.getElementById('task-file'); // Nuevo
+
+            const description = descriptionInput.value.trim();
+            const date = dateInput.value;
+
+            if (!description || !date) {
+                alert('Por favor, completa la descripción y la fecha.');
+                return;
+            }
+            
+            // Obtenemos el nombre del archivo, si existe
+            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
+
+            const tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+            tasks.push({ description, date, fileName }); // Guardamos el nuevo objeto
+            saveTasks(tasks);
+            
+            // Limpiamos el formulario
+            event.target.reset();
+        }
+
+        function deleteTask(event) {
+            if (event.target.matches('.btn-delete')) {
+                const index = parseInt(event.target.dataset.index, 10);
+                let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+                tasks.splice(index, 1);
+                saveTasks(tasks);
+            }
+        }
+        
+        // --- OTRAS FUNCIONES (sin cambios) ---
+        // (Se incluyen aquí para que el código esté completo y funcional)
         function initDashboard() {
-            const quotes = [
-                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
-                { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" },
-                { text: "No tienes que ser grande para empezar, pero tienes que empezar para ser grande.", author: "Zig Ziglar" },
-                { text: "El secreto para salir adelante es empezar.", author: "Mark Twain" }
-            ];
+            const quotes = [{ text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "No tienes que ser grande para empezar, pero tienes que empezar para ser grande.", author: "Zig Ziglar" }, { text: "El secreto para salir adelante es empezar.", author: "Mark Twain" }];
             const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
             document.getElementById('motivational-quote').textContent = randomQuote.text;
             document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
         }
-
-        // --- LÓGICA DEL POMODORO ---
         let pomodoroInterval; let timeLeft = 1500; let isPaused = true; let isWorkSession = true;
-        function initPomodoro() {
-            document.getElementById('pomodoro-start').onclick = startTimer;
-            document.getElementById('pomodoro-pause').onclick = pauseTimer;
-            document.getElementById('pomodoro-reset').onclick = resetTimer;
-        }
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60;
-            document.getElementById('pomodoro-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-        function startTimer() {
-            if (isPaused) {
-                isPaused = false;
-                pomodoroInterval = setInterval(() => {
-                    timeLeft--;
-                    updateTimerDisplay();
-                    if (timeLeft <= 0) {
-                        clearInterval(pomodoroInterval);
-                        isWorkSession = !isWorkSession;
-                        alert(isWorkSession ? "¡Descanso terminado! Es hora de enfocarse." : "¡Buen trabajo! Tomate un breve descanso.");
-                        resetTimer(false);
-                    }
-                }, 1000);
-            }
-        }
+        function initPomodoro() { document.getElementById('pomodoro-start').onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
+        function updateTimerDisplay() { const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60; document.getElementById('pomodoro-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; }
+        function startTimer() { if (isPaused) { isPaused = false; pomodoroInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) { clearInterval(pomodoroInterval); isWorkSession = !isWorkSession; alert(isWorkSession ? "¡Descanso terminado! Es hora de enfocarse." : "¡Buen trabajo! Tomate un breve descanso."); resetTimer(false); } }, 1000); } }
         function pauseTimer() { isPaused = true; clearInterval(pomodoroInterval); }
-        function resetTimer(manualReset = true) {
-            pauseTimer();
-            if (manualReset) isWorkSession = true;
-            timeLeft = isWorkSession ? 1500 : 300;
-            document.getElementById('pomodoro-mode').textContent = isWorkSession ? "Tiempo de Enfoque" : "Descanso Breve";
-            isPaused = true;
-            updateTimerDisplay();
-        }
-
-        // --- LÓGICA DE NOTAS RÁPIDAS ---
-        function initNotes() {
-            const notesArea = document.getElementById('quick-notes');
-            const notesStatus = document.getElementById('notes-status');
-            notesArea.value = localStorage.getItem('quickNotes') || '';
-            let saveTimeout;
-            notesArea.addEventListener('keyup', () => {
-                clearTimeout(saveTimeout);
-                notesStatus.textContent = 'Escribiendo...';
-                saveTimeout = setTimeout(() => {
-                    localStorage.setItem('quickNotes', notesArea.value);
-                    notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`;
-                }, 1000);
-            });
-        }
-        
-        // --- LÓGICA DE HORARIO Y TAREAS ---
+        function resetTimer(manualReset = true) { pauseTimer(); if (manualReset) isWorkSession = true; timeLeft = isWorkSession ? 1500 : 300; document.getElementById('pomodoro-mode').textContent = isWorkSession ? "Tiempo de Enfoque" : "Descanso Breve"; isPaused = true; updateTimerDisplay(); }
+        function initNotes() { const notesArea = document.getElementById('quick-notes'); const notesStatus = document.getElementById('notes-status'); notesArea.value = localStorage.getItem('quickNotes') || ''; let saveTimeout; notesArea.addEventListener('keyup', () => { clearTimeout(saveTimeout); notesStatus.textContent = 'Escribiendo...'; saveTimeout = setTimeout(() => { localStorage.setItem('quickNotes', notesArea.value); notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`; }, 1000); }); }
         const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
         function setupScheduleListeners() { document.getElementById('edit-schedule-btn').addEventListener('click', editSchedule); document.getElementById('save-schedule-btn').addEventListener('click', saveSchedule); document.getElementById('add-row-btn').addEventListener('click', addScheduleRow); }
-        function setupTaskListeners() { document.getElementById('add-tarea-form').addEventListener('submit', addTask); document.getElementById('lista-tareas').addEventListener('click', deleteTask); }
         function loadSchedule(isEditing = false) { const scheduleBody = document.getElementById('schedule-body'); let data = JSON.parse(localStorage.getItem('mySchedule')) || [{}]; scheduleBody.innerHTML = ''; data.forEach((rowData, rowIndex) => { const row = document.createElement('tr'); days.forEach(day => row.appendChild(createScheduleCell(rowIndex, day, rowData[day] || {}, isEditing))); scheduleBody.appendChild(row); }); }
         function createScheduleCell(rowIndex, day, data, isEditing) { const c = document.createElement('td'); c.innerHTML = `<div class="materia-cell ${isEditing ? 'e' : 'view-'}mode" data-row="${rowIndex}" data-day="${day}"><div class="materia-display"><span class="materia-name">${data.materia || '-'}</span><span class="materia-time">${data.inicio && data.fin ? `${data.inicio} - ${data.fin}` : ''}</span></div><div class="time-inputs"><input type="time" class="time-start" value="${data.inicio}"><input type="time" class="time-end" value="${data.fin}"></div><input type="text" placeholder="Materia" class="materia-input" value="${data.materia}"></div>`; return c; }
         function editSchedule() { loadSchedule(true); toggleScheduleButtons(true); }
         function saveSchedule() { let data = []; document.getElementById('schedule-body').querySelectorAll('tr').forEach(r => { let rowData = {}; r.querySelectorAll('.materia-cell').forEach(c => { const day = c.getAttribute('data-day'); rowData[day] = { inicio: c.querySelector('.time-start').value, fin: c.querySelector('.time-end').value, materia: c.querySelector('.materia-input').value.trim() }; }); data.push(rowData); }); localStorage.setItem('mySchedule', JSON.stringify(data)); loadSchedule(false); toggleScheduleButtons(false); }
         function addScheduleRow() { const scheduleBody = document.getElementById('schedule-body'); const i = scheduleBody.rows.length; const r = document.createElement('tr'); days.forEach(d => r.appendChild(createScheduleCell(i, d, {}, true))); scheduleBody.appendChild(r); }
         function toggleScheduleButtons(isEditing) { document.getElementById('edit-schedule-btn').classList.toggle('hidden', isEditing); document.getElementById('save-schedule-btn').classList.toggle('hidden', !isEditing); document.getElementById('add-row-btn').classList.toggle('hidden', !isEditing); }
-        function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
-        function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
-        function renderTasks(tasks) { const taskList = document.getElementById('lista-tareas'); taskList.innerHTML = ''; tasks.forEach((t, i) => { const li = document.createElement('li'); li.innerHTML = `<div class="task-info"><span>${t.description}</span><span class="task-date">Entrega: ${t.date}</span></div><button class="btn btn-delete" data-index="${i}">X</button>`; taskList.appendChild(li); }); }
-        function addTask(e) { e.preventDefault(); const desc = document.getElementById('task-description').value.trim(), date = document.getElementById('task-date').value; if (!desc || !date) return; const t = JSON.parse(localStorage.getItem('myTasks')) || []; t.push({ description: desc, date: date }); saveTasks(t); document.getElementById('add-tarea-form').reset(); }
-        function deleteTask(e) { if (e.target.matches('.btn-delete')) { const i = parseInt(e.target.dataset.index, 10); let t = JSON.parse(localStorage.getItem('myTasks')) || []; t.splice(i, 1); saveTasks(t); } }
+        function loadStaticContent(){
+            // Esta función carga el HTML de las secciones que no cambiaron para no repetirlo en el body
+            document.getElementById('horario').innerHTML = `<h2 class="page-header">Mi Horario Semanal</h2><div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div><div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>`;
+            document.getElementById('pomodoro').innerHTML = `<h2 class="page-header">Temporizador Pomodoro</h2><div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>`;
+            document.getElementById('notas').innerHTML = `<h2 class="page-header">Bloc de Notas y Recursos</h2><div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>`;
+        }
     </script>
 </body>
 </html>
