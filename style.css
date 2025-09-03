@@ -1,0 +1,441 @@
+/* --- VARIABLES Y RESET BÁSICO --- */
+:root {
+    --primary-color: #007bff; /* Azul principal */
+    --secondary-color: #6c757d; /* Gris secundario */
+    --background-light: #f4f7f6; /* Fondo muy claro */
+    --text-dark: #333;
+    --text-light: #fff;
+    --card-bg: #fff;
+    --border-color: #e0e0e0;
+    --shadow-light: rgba(0,0,0,0.08);
+
+    --tag-blue: #a3daff;
+    --tag-orange: #ffcc80;
+    --tag-red: #ff9999;
+    --tag-green: #a7e9af;
+    --tag-darkblue: #66b2ff; /* Para el tag "Digítal: Avanzado" */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-light);
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+/* --- BARRA DE NAVEGACIÓN SUPERIOR --- */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg); /* Fondo blanco */
+    padding: 15px 30px;
+    box-shadow: 0 2px 10px var(--shadow-light);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--text-dark);
+}
+
+.navbar-brand img {
+    height: 40px;
+    margin-right: 10px;
+    border-radius: 50%; /* Si el logo es circular */
+}
+
+.navbar-brand .future-text {
+    color: var(--primary-color);
+}
+
+.navbar-nav {
+    display: flex;
+    gap: 25px; /* Espacio entre los enlaces de navegación */
+}
+
+.nav-link {
+    color: var(--text-dark);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 5px 0;
+    position: relative;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--primary-color);
+}
+
+.nav-link.active {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+}
+
+.navbar-chat-btn {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.navbar-chat-btn:hover {
+    background-color: #0056b3; /* Un azul más oscuro */
+}
+
+/* --- LAYOUT PRINCIPAL DEL DASHBOARD --- */
+.container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.dashboard-grid {
+    display: grid;
+    /* Define 2 columnas con anchos flexibles y espaciado */
+    grid-template-columns: 1fr 1fr;
+    gap: 25px; /* Espacio entre las tarjetas */
+}
+
+/* Ajustes para secciones específicas en el grid */
+.card-materias {
+    grid-column: 1 / 2; /* Ocupa la primera columna */
+}
+
+.card-dieta {
+    grid-column: 2 / 3; /* Ocupa la segunda columna */
+    grid-row: 1 / 2; /* Se alinea en la primera fila */
+}
+
+.card-examenes {
+    grid-column: 1 / 2; /* Ocupa la primera columna debajo de Materias */
+}
+
+.card-tareas {
+    grid-column: 2 / 3; /* Ocupa la segunda columna debajo de Dieta */
+    grid-row: 2 / 3; /* Se alinea en la segunda fila */
+}
+
+
+/* --- ESTILOS DE TARJETAS GENERALES --- */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 4px 15px var(--shadow-light);
+    border: 1px solid var(--border-color);
+    text-align: left;
+    height: fit-content; /* Se ajusta al contenido */
+}
+
+.card h2 {
+    font-size: 1.3rem;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 10px;
+}
+
+/* --- ESTILOS ESPECÍFICOS DE TARJETAS --- */
+
+/* Tags de Materias */
+.tag-group {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los tags salten de línea si no caben */
+    gap: 10px;
+}
+
+.tag {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dark); /* Color de texto por defecto para los tags */
+    background-color: var(--border-color); /* Fondo por defecto */
+}
+
+/* Colores específicos para los tags */
+.tag-blue { background-color: var(--tag-blue); }
+.tag-orange { background-color: var(--tag-orange); }
+.tag-red { background-color: var(--tag-red); }
+.tag-green { background-color: var(--tag-green); }
+.tag-darkblue { background-color: var(--tag-darkblue); color: var(--text-light); } /* Color de texto blanco para este */
+
+
+/* Dieta del Día */
+.diet-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.diet-item i { /* Estilo para el icono si usas Font Awesome */
+    color: var(--primary-color);
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.diet-label {
+    font-weight: bold;
+    min-width: 80px; /* Asegura que el label tenga un ancho mínimo */
+}
+
+.diet-desc {
+    color: #555;
+}
+
+
+/* Listas (Exámenes y Tareas) */
+.card ul {
+    list-style: none; /* Elimina los puntos por defecto de las listas */
+    padding: 0;
+}
+
+.card ul li {
+    margin-bottom: 12px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.card-examenes ul li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.card-examenes ul li:last-child {
+    border-bottom: none;
+}
+
+.card-tareas input[type="checkbox"] {
+    margin-right: 10px;
+    accent-color: var(--primary-color); /* Color del checkbox */
+    transform: scale(1.2); /* Hace el checkbox un poco más grande */
+}
+
+
+/* --- CHAT BOT FLOTANTE (BOTÓN) --- */
+.fab-chat-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    border-radius: 50%;
+    border: none;
+    font-size: 1.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    cursor: pointer;
+    z-index: 1000;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.fab-chat-btn:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+}
+
+/* --- CHAT BOT (VENTANA) --- */
+.chat-bot-window {
+    position: fixed;
+    bottom: 100px; /* Ajusta la posición para que esté encima del FAB */
+    right: 30px;
+    width: 320px;
+    height: 400px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 8px 25px var(--shadow-light);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 999;
+    /* Por defecto, podemos ocultarlo y mostrarlo con JS o simplemente posicionarlo */
+    /* right: -350px; /* Para que esté fuera de la pantalla */
+    /* transition: right 0.3s ease-in-out; */
+}
+
+/* .chat-bot-window.open { /* Clase para mostrarlo */
+/* right: 30px; */
+/* } */
+
+.chat-header {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.chat-close-btn {
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1; /* Para centrar la X */
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto; /* Permite scroll si hay muchos mensajes */
+    background-color: #fcfcfc;
+}
+
+.chat-message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.chat-message.bot img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: var(--border-color); /* Un fondo si no hay imagen */
+    flex-shrink: 0; /* Evita que la imagen se achique */
+}
+
+.chat-message span {
+    background-color: var(--tag-blue);
+    padding: 10px 15px;
+    border-radius: 15px 15px 15px 0; /* Bordes redondeados, excepto el inferior-izquierdo */
+    max-width: 80%;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.chat-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
+}
+
+.chat-options span {
+    background-color: var(--border-color);
+    color: #555;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.chat-options span:hover {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+
+.chat-input {
+    display: flex;
+    padding: 10px 15px;
+    border-top: 1px solid var(--border-color);
+    align-items: center;
+}
+
+.chat-input input {
+    flex-grow: 1;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 1rem;
+    margin-right: 10px;
+    outline: none; /* Quita el contorno al hacer focus */
+}
+
+.chat-input input:focus {
+    border-color: var(--primary-color);
+}
+
+.chat-input i { /* Para el icono de enviar si usas Font Awesome */
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+
+/* --- MEDIA QUERIES (PARA HACERLA RESPONSIVA) --- */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px 20px;
+    }
+
+    .navbar-nav {
+        margin-top: 15px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .navbar-chat-btn {
+        margin-top: 15px;
+        align-self: flex-end; /* Alinea el botón a la derecha */
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Una sola columna en pantallas pequeñas */
+    }
+
+    .card-materias, .card-dieta, .card-examenes, .card-tareas {
+        grid-column: auto; /* Restablece la ocupación de columna */
+        grid-row: auto; /* Restablece la ocupación de fila */
+    }
+
+    .fab-chat-btn {
+        bottom: 20px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+
+    .chat-bot-window {
+        bottom: 80px;
+        right: 20px;
+        width: calc(100% - 40px); /* Ocupa casi todo el ancho */
+        height: 350px;
+    }
+}
