@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRA Asistente Estudiantil</title>
+    <title>PRA Asistente Estudiantil (con Gemini AI)</title>
     
     <style>
         /* --- ESTILOS GENERALES Y VARIABLES --- */
@@ -185,18 +185,17 @@
         .task-details { display: flex; flex-direction: column; flex-grow: 1; margin-right: 15px; }
         .task-description { font-weight: 600; }
         .task-date { font-size: 0.9rem; color: #555; }
-        .task-actions { display: flex; align-items: center; flex-wrap: wrap; }
         .task-file-info {
             font-size: 0.85rem;
             color: var(--pra-blue);
             font-style: italic;
-            margin-right: 10px;
+            margin-top: 5px;
         }
         
         .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
         .btn-primary { background-color: var(--pra-lightblue); color: var(--text-light); }
         .btn-edit { background-color: var(--warning); color: var(--text-light); }
-        .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; }
+        .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; margin-left: auto; }
         .btn-add-row { background-color: var(--success); color: white; }
 
         /* --- ESTILOS DEL CHATBOT --- */
@@ -261,6 +260,7 @@
             border-radius: 18px;
             margin-bottom: 10px;
             line-height: 1.4;
+            white-space: pre-wrap;
         }
         .bot-message {
             background: var(--background-grey);
@@ -273,6 +273,13 @@
             color: white;
             align-self: flex-end;
             border-bottom-right-radius: 4px;
+        }
+        .bot-loading-message {
+            background: var(--background-grey);
+            color: #999;
+            font-style: italic;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
         }
         .chat-input-form {
             display: flex;
@@ -311,25 +318,97 @@
 <body>
 
     <div id="app-container">
-        </div>
+        <nav class="sidebar">
+            <div class="sidebar-header"><h1>PRA</h1><span>Asistente Estudiantil</span></div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="#inicio" class="nav-link active">Inicio</a></li>
+                <li class="nav-item"><a href="#horario" class="nav-link">Mi Horario</a></li>
+                <li class="nav-item"><a href="#tareas" class="nav-link">Tareas Pendientes</a></li>
+                <li class="nav-item"><a href="#pomodoro" class="nav-link">Enfoque Pomodoro</a></li>
+                <li class="nav-item"><a href="#notas" class="nav-link">Notas Rápidas</a></li>
+            </ul>
+        </nav>
+        <main class="main-content">
+            <section id="inicio" class="content-section active">
+                <h2 class="page-header">Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="card quote-card">
+                        <h3>Dosis de Motivación</h3>
+                        <blockquote id="motivational-quote"></blockquote>
+                        <cite id="quote-author"></cite>
+                    </div>
+                    <div class="card tips-card personal-care-card">
+                        <h3>Tips de Cuidado Personal</h3>
+                        <ul id="personal-care-list"></ul>
+                    </div>
+                    <div class="card tips-card moda-card">
+                        <h3>Tips de Moda y Estilo</h3>
+                        <ul id="fashion-tips-list"></ul>
+                    </div>
+                    <div class="card tips-card salud-card">
+                        <h3>Tips de Salud y Alimentación</h3>
+                        <ul id="health-tips-list"></ul>
+                    </div>
+                </div>
+            </section>
+            <section id="horario" class="content-section">
+                <h2 class="page-header">Mi Horario Semanal</h2>
+                <div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div>
+                <div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>
+            </section>
+            <section id="tareas" class="content-section">
+                <h2 class="page-header">Tareas Pendientes</h2>
+                <form id="add-tarea-form">
+                    <input type="text" id="task-description" placeholder="Descripción..." required>
+                    <input type="date" id="task-date" required>
+                    <input type="file" id="task-file">
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </form>
+                <ul id="lista-tareas"></ul>
+            </section>
+            <section id="pomodoro" class="content-section">
+                <h2 class="page-header">Temporizador Pomodoro</h2>
+                <div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>
+            </section>
+            <section id="notas" class="content-section">
+                <h2 class="page-header">Bloc de Notas y Recursos</h2>
+                <div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>
+            </section>
+        </main>
+    </div>
     
     <button class="chat-fab" id="chat-fab-btn">💬</button>
     <div class="chat-window hidden" id="chat-window">
-        <div class="chat-header">Asistente Virtual</div>
+        <div class="chat-header">Asistente con IA (Gemini)</div>
         <div class="chat-messages" id="chat-messages"></div>
         <form class="chat-input-form" id="chat-form">
-            <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." autocomplete="off">
+            <input type="text" id="chat-input" placeholder="Pregúntale algo a la IA..." autocomplete="off">
             <button type="submit" id="chat-send-btn">➤</button>
         </form>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadAppHTMLAndInit(); 
-            initChatbot();
-        });
+        // --- ¡ADVERTENCIA DE SEGURIDAD! ---
+        // Este código es solo para pruebas en tu computadora local.
+        // NO subas este archivo a un repositorio público de GitHub con tu API Key.
+        const GEMINI_API_KEY = "AIzaSyBhQ_vB-2QlTgvca4Cp_UGkZ0kjMmWqgOo";
 
-        // --- LÓGICA DEL CHATBOT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializadores principales
+            document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
+            initDashboard();
+            initPomodoro();
+            initNotes();
+            setupScheduleListeners();
+            setupTaskListeners();
+            initChatbot();
+
+            // Cargar datos guardados
+            loadSchedule();
+            loadTasks();
+        });
+        
+        // --- LÓGICA DEL CHATBOT (CONECTADO A GEMINI AI) ---
         function initChatbot() {
             const fabBtn = document.getElementById('chat-fab-btn');
             const chatWindow = document.getElementById('chat-window');
@@ -339,100 +418,76 @@
 
             fabBtn.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
 
-            chatForm.addEventListener('submit', (e) => {
+            chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const userMessage = chatInput.value.trim();
                 if (userMessage === '') return;
+
                 addMessage(userMessage, 'user');
                 chatInput.value = '';
-                setTimeout(() => {
-                    const botResponse = getBotResponse(userMessage);
-                    addMessage(botResponse, 'bot');
-                }, 600);
+                addMessage("Pensando...", 'bot-loading');
+
+                const botResponse = await getAIResponse(userMessage);
+                
+                const loadingMessage = document.querySelector('.bot-loading-message');
+                if(loadingMessage) loadingMessage.remove();
+
+                addMessage(botResponse, 'bot');
             });
 
-            function addMessage(text, sender) {
+            function addMessage(text, type) {
                 const messageElement = document.createElement('div');
-                messageElement.classList.add('message', `${sender}-message`);
+                messageElement.classList.add('message', `${type}-message`);
                 messageElement.textContent = text;
                 chatMessages.appendChild(messageElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
+            
+            addMessage('¡Hola! Estoy conectado a la IA de Google. ¿En qué puedo ayudarte?', 'bot');
+        }
 
-            function getBotResponse(userInput) {
-                const text = userInput.toLowerCase();
-                if (text.includes('hola') || text.includes('buenos dias')) return '¡Hola! Espero que tengas un excelente día. ¿En qué te puedo ayudar?';
-                if (text.includes('tarea') || text.includes('deberes')) return 'Puedes gestionar tus tareas en la sección "Tareas Pendientes". ¡No olvides poner una fecha de entrega!';
-                if (text.includes('horario') || text.includes('clases')) return 'Tu horario de clases semanal está en la sección "Mi Horario". Puedes modificarlo cuando quieras.';
-                if (text.includes('examen') || text.includes('estudiar')) return 'Para prepararte para un examen, te recomiendo usar el Temporizador Pomodoro para enfocarte. ¡25 minutos de estudio y 5 de descanso!';
-                if (text.includes('consejo') || text.includes('tip') || text.includes('estrés')) return 'Recuerda tomar descansos regulares y mantenerte hidratado. En el Dashboard encontrarás tips de bienestar y motivación cada día.';
-                if (text.includes('gracias') || text.includes('adios')) return '¡De nada! Estoy aquí si me necesitas. ¡Mucho éxito!';
-                return "No estoy seguro de entender. Intenta preguntarme sobre 'tareas', 'horario', 'estudiar' o 'consejos'.";
+        async function getAIResponse(userInput) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "PEGA_TU_API_KEY_AQUÍ") {
+                return "Error: La API Key de Gemini no está configurada. Por favor, añádela en la variable GEMINI_API_KEY al principio del script.";
             }
-            addMessage('¡Hola! Soy tu asistente. ¿Cómo puedo ayudarte hoy? Prueba preguntando sobre "tareas", "horario" o "consejos".', 'bot');
+
+            const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + GEMINI_API_KEY;
+            const requestBody = { "contents": [ { "parts": [ { "text": `Eres un asistente virtual para un estudiante de preparatoria. Sé amigable, conciso y útil. Responde a la siguiente pregunta: ${userInput}` } ] } ] };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error de la API:", errorData);
+                    return `Lo siento, hubo un error con la API: ${errorData.error.message}`;
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0]) {
+                    return data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    console.error("Respuesta inesperada de la API:", data);
+                    return "Lo siento, recibí una respuesta inesperada de la IA.";
+                }
+            } catch (error) {
+                console.error("Error en la conexión:", error);
+                return "Lo siento, no pude conectarme al servicio de IA. Revisa tu conexión a internet o la consola de errores (F12).";
+            }
         }
 
-        // --- LÓGICA DE LA APP PRINCIPAL ---
-        function loadAppHTMLAndInit() {
-            document.getElementById('app-container').innerHTML = `
-                <nav class="sidebar">
-                    <div class="sidebar-header"><h1>PRA</h1><span>Asistente Estudiantil</span></div>
-                    <ul class="nav-menu">
-                        <li class="nav-item"><a href="#inicio" class="nav-link active">Inicio</a></li>
-                        <li class="nav-item"><a href="#horario" class="nav-link">Mi Horario</a></li>
-                        <li class="nav-item"><a href="#tareas" class="nav-link">Tareas Pendientes</a></li>
-                        <li class="nav-item"><a href="#pomodoro" class="nav-link">Enfoque Pomodoro</a></li>
-                        <li class="nav-item"><a href="#notas" class="nav-link">Notas Rápidas</a></li>
-                    </ul>
-                </nav>
-                <main class="main-content">
-                    <section id="inicio" class="content-section active"><h2 class="page-header">Dashboard</h2><div class="dashboard-grid"><div class="card quote-card"><h3>Dosis de Motivación</h3><blockquote id="motivational-quote"></blockquote><cite id="quote-author"></cite></div><div class="card tips-card personal-care-card"><h3>Tips de Cuidado Personal</h3><ul id="personal-care-list"></ul></div><div class="card tips-card moda-card"><h3>Tips de Moda y Estilo</h3><ul id="fashion-tips-list"></ul></div><div class="card tips-card salud-card"><h3>Tips de Salud y Alimentación</h3><ul id="health-tips-list"></ul></div></div></section>
-                    <section id="horario" class="content-section"></section>
-                    <section id="tareas" class="content-section"></section>
-                    <section id="pomodoro" class="content-section"></section>
-                    <section id="notas" class="content-section"></section>
-                </main>
-            `;
-            
-            // Llama a la función que carga el contenido estático Y ACTIVA LOS LISTENERS
-            loadAndInitStaticContent();
-
-            // Inicializa los módulos que ya están en el DOM principal
-            document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
-            initDashboard();
-        }
-
-        // FUNCIÓN CORREGIDA Y CENTRALIZADA
-        function loadAndInitStaticContent(){
-            // Cargar HTML
-            document.getElementById('horario').innerHTML = `<h2 class="page-header">Mi Horario Semanal</h2><div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div><div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>`;
-            document.getElementById('tareas').innerHTML = `<h2 class="page-header">Tareas Pendientes</h2><form id="add-tarea-form"><input type="text" id="task-description" placeholder="Descripción..." required><input type="date" id="task-date" required><input type="file" id="task-file"><button type="submit" class="btn btn-primary">Agregar</button></form><ul id="lista-tareas"></ul>`;
-            document.getElementById('pomodoro').innerHTML = `<h2 class="page-header">Temporizador Pomodoro</h2><div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>`;
-            document.getElementById('notas').innerHTML = `<h2 class="page-header">Bloc de Notas y Recursos</h2><div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>`;
-            
-            // Activar funcionalidades DESPUÉS de cargar el HTML
-            initPomodoro();
-            initNotes();
-            setupScheduleListeners();
-            setupTaskListeners();
-            loadSchedule();
-            loadTasks();
-        }
-
-        function handleNavClick(e) {
-            e.preventDefault();
-            const targetId = e.currentTarget.getAttribute('href').substring(1);
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(targetId).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            e.currentTarget.classList.add('active');
-        }
-
+        // --- LÓGICA DE LA APP PRINCIPAL (RESTO DE FUNCIONES) ---
+        function handleNavClick(e) { e.preventDefault(); const targetId = e.currentTarget.getAttribute('href').substring(1); document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(targetId).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); e.currentTarget.classList.add('active'); }
         function initDashboard() {
-            const motivationalQuotes = [ { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" }, { text: "No tienes que ser grande para empezar, pero tienes que empezar para ser grande.", author: "Zig Ziglar" }, { text: "Cree que puedes y ya estás a medio camino.", author: "Theodore Roosevelt" } ];
-            const personalCareTips = [ "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.", "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.", "Tómate 5 minutos para estirarte entre largas sesiones de estudio.", "Asegúrate de dormir entre 7 y 9 horas. Un buen descanso es clave para aprender.", "Limpia tu rostro cada noche para mantener tu piel sana y fresca.", "Usa bloqueador solar, incluso en días nublados." ];
-            const fashionTips = [ "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.", "El ajuste de la ropa es clave para un buen estilo.", "Usa accesorios para darle un toque diferente a un outfit simple.", "Limpia y cuida tus zapatos; son una parte importante de tu imagen." ];
-            const healthTips = [ "Una manzana es un snack energético y saludable, ideal para media tarde.", "Intenta comer al menos 5 porciones de frutas y verduras al día.", "Si pasas mucho tiempo sentado, levántate y camina un poco cada hora.", "Sustituye las bebidas azucaradas por agua o infusiones naturales." ];
+            const motivationalQuotes = [ { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" } ];
+            const personalCareTips = [ "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.", "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.", "Tómate 5 minutos para estirarte entre largas sesiones de estudio.", "Asegúrate de dormir entre 7 y 9 horas." ];
+            const fashionTips = [ "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.", "El ajuste de la ropa es clave para un buen estilo.", "Limpia y cuida tus zapatos; son una parte importante de tu imagen." ];
+            const healthTips = [ "Una manzana es un snack energético y saludable, ideal para media tarde.", "Intenta comer al menos 5 porciones de frutas y verduras al día.", "Si pasas mucho tiempo sentado, levántate y camina un poco cada hora." ];
             const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
             document.getElementById('motivational-quote').textContent = randomQuote.text;
             document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
@@ -440,36 +495,20 @@
             renderRandomTips('fashion-tips-list', fashionTips, 2);
             renderRandomTips('health-tips-list', healthTips, 2);
         }
-
-        function renderRandomTips(elementId, tipsArray, count) {
-            const listElement = document.getElementById(elementId);
-            if (!listElement) return;
-            listElement.innerHTML = '';
-            const shuffledTips = tipsArray.sort(() => 0.5 - Math.random());
-            const selectedTips = shuffledTips.slice(0, count);
-            selectedTips.forEach(tipText => {
-                const listItem = document.createElement('li');
-                listItem.textContent = tipText;
-                listElement.appendChild(listItem);
-            });
-        }
-        
+        function renderRandomTips(elementId, tipsArray, count) { const listElement = document.getElementById(elementId); if (!listElement) return; listElement.innerHTML = ''; const shuffledTips = tipsArray.sort(() => 0.5 - Math.random()); const selectedTips = shuffledTips.slice(0, count); selectedTips.forEach(tipText => { const listItem = document.createElement('li'); listItem.textContent = tipText; listElement.appendChild(listItem); }); }
         function setupTaskListeners() { document.getElementById('add-tarea-form').addEventListener('submit', addTask); document.getElementById('lista-tareas').addEventListener('click', deleteTask); }
         function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
         function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
         function renderTasks(tasks) { const taskList = document.getElementById('lista-tareas'); if(!taskList) return; taskList.innerHTML = ''; tasks.forEach((task, index) => { const li = document.createElement('li'); const taskDetails = document.createElement('div'); taskDetails.className = 'task-details'; const taskDesc = document.createElement('span'); taskDesc.className = 'task-description'; taskDesc.textContent = task.description; const taskDate = document.createElement('span'); taskDate.className = 'task-date'; taskDate.textContent = `Entrega: ${task.date}`; taskDetails.appendChild(taskDesc); taskDetails.appendChild(taskDate); if (task.fileName) { const taskFile = document.createElement('span'); taskFile.className = 'task-file-info'; taskFile.textContent = `📎 Archivo: ${task.fileName}`; taskDetails.appendChild(taskFile); } const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn btn-delete'; deleteBtn.textContent = 'X'; deleteBtn.dataset.index = index; li.appendChild(taskDetails); li.appendChild(deleteBtn); taskList.appendChild(li); }); }
         function addTask(event) { event.preventDefault(); const descInput = document.getElementById('task-description'); const dateInput = document.getElementById('task-date'); const fileInput = document.getElementById('task-file'); const description = descInput.value.trim(); const date = dateInput.value; if (!description || !date) { alert('Por favor, completa la descripción y la fecha.'); return; } const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null; const tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.push({ description, date, fileName }); saveTasks(tasks); event.target.reset(); }
         function deleteTask(event) { if (event.target.matches('.btn-delete')) { const index = parseInt(event.target.dataset.index, 10); let tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.splice(index, 1); saveTasks(tasks); } }
-        
         let pomodoroInterval; let timeLeft = 1500; let isPaused = true; let isWorkSession = true;
         function initPomodoro() { const pStart = document.getElementById('pomodoro-start'); if(!pStart) return; pStart.onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
         function updateTimerDisplay() { const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60; document.getElementById('pomodoro-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; }
         function startTimer() { if (isPaused) { isPaused = false; pomodoroInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) { clearInterval(pomodoroInterval); isWorkSession = !isWorkSession; alert(isWorkSession ? "¡Descanso terminado! Es hora de enfocarse." : "¡Buen trabajo! Tomate un breve descanso."); resetTimer(false); } }, 1000); } }
         function pauseTimer() { isPaused = true; clearInterval(pomodoroInterval); }
         function resetTimer(manualReset = true) { pauseTimer(); if (manualReset) isWorkSession = true; timeLeft = isWorkSession ? 1500 : 300; document.getElementById('pomodoro-mode').textContent = isWorkSession ? "Tiempo de Enfoque" : "Descanso Breve"; isPaused = true; updateTimerDisplay(); }
-        
         function initNotes() { const notesArea = document.getElementById('quick-notes'); if(!notesArea) return; const notesStatus = document.getElementById('notes-status'); notesArea.value = localStorage.getItem('quickNotes') || ''; let saveTimeout; notesArea.addEventListener('keyup', () => { clearTimeout(saveTimeout); notesStatus.textContent = 'Escribiendo...'; saveTimeout = setTimeout(() => { localStorage.setItem('quickNotes', notesArea.value); notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`; }, 1000); }); }
-        
         const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
         function setupScheduleListeners() { const editBtn = document.getElementById('edit-schedule-btn'); if(!editBtn) return; editBtn.addEventListener('click', editSchedule); document.getElementById('save-schedule-btn').addEventListener('click', saveSchedule); document.getElementById('add-row-btn').addEventListener('click', addScheduleRow); }
         function loadSchedule(isEditing = false) { const scheduleBody = document.getElementById('schedule-body'); if(!scheduleBody) return; let data = JSON.parse(localStorage.getItem('mySchedule')) || [{}]; scheduleBody.innerHTML = ''; data.forEach((rowData, rowIndex) => { const row = document.createElement('tr'); days.forEach(day => row.appendChild(createScheduleCell(rowIndex, day, rowData[day] || {}, isEditing))); scheduleBody.appendChild(row); }); }
