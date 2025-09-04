@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRA Asistente Estudiantil v2.0</title>
+    <title>PRA Asistente Estudiantil (con Gemini AI)</title>
     
     <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-
+    
     <style>
         /* --- ESTILOS GENERALES Y VARIABLES --- */
         :root {
@@ -21,9 +21,6 @@
             --success: #27ae60;
             --warning: #f39c12;
             --danger: #e74c3c;
-            --priority-high: #e57373;
-            --priority-medium: #ffb74d;
-            --priority-low: #81c784;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -36,100 +33,307 @@
             overflow-x: hidden;
         }
 
-        /* --- LAYOUT PRINCIPAL --- */
-        #app-container { display: flex; min-height: 100vh; }
-        .sidebar { width: 240px; background-color: var(--pra-blue); color: var(--text-light); padding: 20px; display: flex; flex-direction: column; }
-        .sidebar-header { text-align: center; margin-bottom: 30px; }
-        .sidebar-header h1 { font-size: 1.5rem; margin: 0; color: var(--text-light); }
-        .sidebar-header span { font-size: 0.9rem; opacity: 0.8; }
-        .nav-menu { list-style: none; padding: 0; flex-grow: 1; }
-        .nav-item a { display: block; padding: 12px 15px; color: var(--text-light); text-decoration: none; border-radius: 8px; margin-bottom: 5px; font-weight: 500; }
-        .nav-item a:hover, .nav-item a.active { background-color: var(--pra-lightblue); }
-        [data-netlify-identity-menu] { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.2); }
-        .netlify-identity-button { background-color: var(--pra-lightblue) !important; border-radius: 8px !important; padding: 10px !important; font-weight: 600 !important; color: white !important; border: none !important; text-align: center !important; display: block !important; width: 100%; margin-bottom: 10px !important; }
+        /* --- LAYOUT PRINCIPAL (SIDEBAR + CONTENT) --- */
+        #app-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: var(--pra-blue);
+            color: var(--text-light);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+            color: var(--text-light);
+        }
+        .sidebar-header span {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            flex-grow: 1;
+        }
+
+        .nav-item a {
+            display: block;
+            padding: 12px 15px;
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .nav-item a:hover, .nav-item a.active {
+            background-color: var(--pra-lightblue);
+        }
         
-        .main-content { flex-grow: 1; padding: 30px; overflow-y: auto; }
+        /* Estilos para el Widget de Netlify Identity */
+        [data-netlify-identity-menu] {
+            margin-top: auto; /* Empuja los botones al final de la barra lateral */
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .netlify-identity-button { /* Estilo para los botones de Login/Signup/Logout */
+            background-color: var(--pra-lightblue) !important;
+            border-radius: 8px !important;
+            padding: 10px !important;
+            font-weight: 600 !important;
+            color: white !important;
+            border: none !important;
+            text-align: center !important;
+            display: block !important;
+            width: 100%;
+            margin-bottom: 10px !important;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
         .content-section { display: none; }
         .content-section.active { display: block; }
         .hidden { display: none !important; }
 
         /* --- ESTILOS DE COMPONENTES --- */
-        .page-header { margin-bottom: 25px; color: var(--pra-blue); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow); }
+        .page-header {
+            margin-bottom: 25px;
+            color: var(--pra-blue);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
         .card h3 { margin-top: 0; color: var(--pra-blue); }
-        .quote-card blockquote { font-size: 1.2rem; font-style: italic; margin: 0; border-left: 4px solid var(--pra-lightblue); padding-left: 15px; }
-        .quote-card cite { display: block; text-align: right; margin-top: 10px; font-weight: 500; }
-        .tips-card ul { list-style: none; padding: 0; }
-        .tips-card li { margin-bottom: 12px; padding-left: 25px; position: relative; line-height: 1.4; }
-        .tips-card li::before { content: '✨'; position: absolute; left: 0; top: 0; }
-        .moda-card li::before { content: '👗'; } .salud-card li::before { content: '🍎'; } .next-class-card li::before { content: '🕒'; }
-        
-        /* Pomodoro */
-        .pomodoro-card { text-align: center; } #pomodoro-time { font-size: 4rem; font-weight: 600; margin: 15px 0; }
-        .pomodoro-settings { display: flex; gap: 15px; justify-content: center; margin-bottom: 20px; }
-        .pomodoro-settings label { display: flex; flex-direction: column; align-items: center; }
-        .pomodoro-settings input { width: 60px; text-align: center; padding: 5px; border: 1px solid var(--border-color); border-radius: 4px; }
+        .quote-card blockquote {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin: 0;
+            border-left: 4px solid var(--pra-lightblue);
+            padding-left: 15px;
+        }
+        .quote-card cite {
+            display: block;
+            text-align: right;
+            margin-top: 10px;
+            font-weight: 500;
+        }
 
-        /* Horario */
-        .schedule-table-wrapper { overflow-x: auto; } .schedule-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .tips-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .tips-card li {
+            margin-bottom: 12px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.4;
+        }
+        .tips-card li::before {
+            content: '✨';
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .moda-card li::before { content: '👗'; }
+        .salud-card li::before { content: '🍎'; }
+
+
+        .pomodoro-card { text-align: center; }
+        #pomodoro-time { font-size: 4rem; font-weight: 600; margin: 15px 0; }
+        #quick-notes { width: 100%; height: 200px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; resize: vertical; }
+        .schedule-table-wrapper { overflow-x: auto; }
+        .schedule-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         .schedule-table th, .schedule-table td { border: 1px solid var(--border-color); padding: 8px; text-align: center; vertical-align: middle; }
         .schedule-table th { background-color: var(--background-grey); }
-        .materia-cell { padding: 5px; min-height: 60px; position: relative; }
-        .materia-input-group { display: flex; flex-direction: column; gap: 5px; }
-        .materia-input-group input[type="text"] { width: calc(100% - 16px); }
-        .materia-input-group input[type="color"] { width: 30px; height: 30px; padding: 2px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; }
-        .materia-cell input { margin-bottom: 5px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .materia-cell { padding: 5px; min-height: 60px; }
+        .materia-cell input { width: calc(100% - 16px); margin-bottom: 5px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         .materia-cell .time-inputs { display: flex; gap: 5px; }
-        .materia-cell.view-mode .time-inputs, .materia-cell.view-mode .materia-input-group { display: none; }
-        .materia-cell .materia-display { display: none; } .materia-cell.view-mode .materia-display { display: block; font-weight: 500; border-radius: 4px; padding: 10px; }
+        .materia-cell.view-mode .time-inputs, .materia-cell.view-mode input[placeholder="Materia"] { display: none; }
+        .materia-cell .materia-display { display: none; }
+        .materia-cell.view-mode .materia-display { display: block; font-weight: 500; }
         .materia-display .materia-time { font-size: 0.85rem; color: #555; display: block; }
         
-        /* Tareas */
-        #add-tarea-form { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; flex-wrap: wrap; }
-        #add-tarea-form input[type="text"] { flex-grow: 1; }
-        #add-tarea-form input, #add-tarea-form select { padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
+        #add-tarea-form {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+        #add-tarea-form input {
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        #task-file { padding: 9px; font-size: 0.9rem; }
+
         #lista-tareas { list-style: none; padding: 0; }
-        #lista-tareas li { padding: 15px; background-color: #f9f9f9; border-radius: 6px; margin-bottom: 10px; border-left: 8px solid; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
-        #lista-tareas li.priority-high { border-left-color: var(--priority-high); }
-        #lista-tareas li.priority-medium { border-left-color: var(--priority-medium); }
-        #lista-tareas li.priority-low { border-left-color: var(--priority-low); }
-        #lista-tareas li.completed .task-description { text-decoration: line-through; opacity: 0.6; }
-        .task-content { display: flex; align-items: center; flex-grow: 1; }
-        .task-content input[type="checkbox"] { margin-right: 15px; width: 20px; height: 20px; }
-        .task-details { display: flex; flex-direction: column; }
+        #lista-tareas li {
+            padding: 15px; background-color: #f9f9f9; border-radius: 6px;
+            margin-bottom: 10px; border-left: 5px solid var(--pra-lightblue);
+            display: flex; justify-content: space-between; align-items: center;
+            flex-wrap: wrap;
+        }
+        .task-details { display: flex; flex-direction: column; flex-grow: 1; margin-right: 15px; }
         .task-description { font-weight: 600; }
         .task-date { font-size: 0.9rem; color: #555; }
+        .task-file-info {
+            font-size: 0.85rem;
+            color: var(--pra-blue);
+            font-style: italic;
+            margin-top: 5px;
+        }
         
-        /* Habit Tracker */
-        #add-habit-form { display: flex; gap: 15px; margin-bottom: 25px; }
-        #add-habit-form input { flex-grow: 1; }
-        #habit-tracker-grid { display: grid; gap: 5px; overflow-x: auto; padding-bottom: 10px; }
-        .habit-row { display: contents; }
-        .habit-name { background: var(--pra-blue); color: white; padding: 10px; border-radius: 4px; text-align: left; }
-        .habit-day { background: #fff; border: 1px solid var(--border-color); border-radius: 4px; aspect-ratio: 1 / 1; cursor: pointer; transition: background-color 0.2s; }
-        .habit-day.completed { background: var(--success); }
-        
-        /* --- ESTILOS GENERALES DE BOTONES --- */
         .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
         .btn-primary { background-color: var(--pra-lightblue); color: var(--text-light); }
+        .btn-edit { background-color: var(--warning); color: var(--text-light); }
         .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; margin-left: auto; }
+        .btn-add-row { background-color: var(--success); color: white; }
 
         /* --- ESTILOS DEL CHATBOT --- */
-        .chat-fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: var(--pra-blue); color: white; border-radius: 50%; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 2rem; transition: transform 0.3s ease; z-index: 1000; }
-        .chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; max-width: 90%; height: 450px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.3s ease, transform 0.3s ease; transform-origin: bottom right; z-index: 999; }
-        .chat-window.hidden { transform: scale(0); opacity: 0; }
-        .chat-header { background: var(--pra-blue); color: white; padding: 15px; font-weight: bold; text-align: center; }
-        .chat-messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
-        .message { max-width: 80%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; line-height: 1.4; white-space: pre-wrap; }
-        .bot-message { background: var(--background-grey); color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 4px; }
-        .user-message { background: var(--pra-lightblue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
-        .chat-input-form { display: flex; border-top: 1px solid var(--border-color); padding: 10px; }
-        #chat-input { flex-grow: 1; border: none; padding: 10px; font-size: 1rem; outline: none; }
-        #chat-send-btn { background: none; border: none; color: var(--pra-lightblue); font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
-        
+        .chat-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--pra-blue);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        .chat-fab:hover { transform: scale(1.1); }
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            max-width: 90%;
+            height: 450px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform-origin: bottom right;
+            z-index: 999;
+        }
+        .chat-window.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
+        .chat-header {
+            background: var(--pra-blue);
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+        .bot-message {
+            background: var(--background-grey);
+            color: var(--text-dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .user-message {
+            background: var(--pra-lightblue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-loading-message {
+            background: var(--background-grey);
+            color: #999;
+            font-style: italic;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-form {
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+        }
+        #chat-input {
+            flex-grow: 1;
+            border: none;
+            padding: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+        #chat-send-btn {
+            background: none;
+            border: none;
+            color: var(--pra-lightblue);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
         /* --- RESPONSIVE --- */
-        @media (max-width: 768px) { #app-container { flex-direction: column; } .sidebar { width: 100%; height: auto; position: relative; } .main-content { padding: 20px; } .dashboard-grid { grid-template-columns: 1fr; } #add-tarea-form { flex-direction:column; align-items: stretch; } #add-tarea-form > * { margin-bottom: 10px; } .btn { width: 100%; margin-top: 10px; margin-right: 0; } #lista-tareas li { flex-direction: column; align-items: flex-start; } }
+        @media (max-width: 768px) {
+            #app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: relative; }
+            .main-content { padding: 20px; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            #add-tarea-form { grid-template-columns: 1fr; }
+            .btn { width: 100%; margin-top: 10px; margin-right: 0; }
+            #lista-tareas li { flex-direction: column; align-items: flex-start; }
+            .task-actions { margin-left: auto; margin-top: 10px; }
+        }
     </style>
 </head>
 <body>
@@ -142,7 +346,6 @@
                 <li class="nav-item"><a href="#horario" class="nav-link">Mi Horario</a></li>
                 <li class="nav-item"><a href="#tareas" class="nav-link">Tareas Pendientes</a></li>
                 <li class="nav-item"><a href="#pomodoro" class="nav-link">Enfoque Pomodoro</a></li>
-                <li class="nav-item"><a href="#habitos" class="nav-link">Seguimiento de Hábitos</a></li>
                 <li class="nav-item"><a href="#notas" class="nav-link">Notas Rápidas</a></li>
             </ul>
             <div data-netlify-identity-menu></div>
@@ -156,10 +359,6 @@
                         <blockquote id="motivational-quote"></blockquote>
                         <cite id="quote-author"></cite>
                     </div>
-                    <div class="card tips-card next-class-card">
-                        <h3>Próximamente</h3>
-                        <ul id="next-class-list"><li>Cargando horario...</li></ul>
-                    </div>
                     <div class="card tips-card personal-care-card">
                         <h3>Tips de Cuidado Personal</h3>
                         <ul id="personal-care-list"></ul>
@@ -168,54 +367,30 @@
                         <h3>Tips de Moda y Estilo</h3>
                         <ul id="fashion-tips-list"></ul>
                     </div>
+                    <div class="card tips-card salud-card">
+                        <h3>Tips de Salud y Alimentación</h3>
+                        <ul id="health-tips-list"></ul>
+                    </div>
                 </div>
             </section>
-            
             <section id="horario" class="content-section">
                 <h2 class="page-header">Mi Horario Semanal</h2>
                 <div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div>
                 <div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>
             </section>
-            
             <section id="tareas" class="content-section">
                 <h2 class="page-header">Tareas Pendientes</h2>
                 <form id="add-tarea-form">
-                    <input type="text" id="task-description" placeholder="Descripción de la tarea..." required>
+                    <input type="text" id="task-description" placeholder="Descripción..." required>
                     <input type="date" id="task-date" required>
-                    <select id="task-priority" required>
-                        <option value="medium" selected>Prioridad Media</option>
-                        <option value="high">Prioridad Alta</option>
-                        <option value="low">Prioridad Baja</option>
-                    </select>
                     <button type="submit" class="btn btn-primary">Agregar</button>
                 </form>
                 <ul id="lista-tareas"></ul>
             </section>
-            
             <section id="pomodoro" class="content-section">
                 <h2 class="page-header">Temporizador Pomodoro</h2>
-                <div class="card pomodoro-card">
-                    <div class="pomodoro-settings">
-                        <label>Enfoque (min): <input type="number" id="pomodoro-work-time" value="25"></label>
-                        <label>Descanso (min): <input type="number" id="pomodoro-break-time" value="5"></label>
-                    </div>
-                    <h3 id="pomodoro-mode">Tiempo de Enfoque</h3>
-                    <div id="pomodoro-time">25:00</div>
-                    <div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div>
-                </div>
+                <div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>
             </section>
-
-            <section id="habitos" class="content-section">
-                <h2 class="page-header">Seguimiento de Hábitos</h2>
-                <div class="card">
-                    <form id="add-habit-form">
-                        <input type="text" id="new-habit-input" placeholder="Añadir nuevo hábito (ej. Leer 10 páginas)" required>
-                        <button type="submit" class="btn btn-primary">Añadir Hábito</button>
-                    </form>
-                    <div id="habit-tracker-grid"></div>
-                </div>
-            </section>
-
             <section id="notas" class="content-section">
                 <h2 class="page-header">Bloc de Notas y Recursos</h2>
                 <div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>
@@ -225,373 +400,35 @@
     
     <button class="chat-fab" id="chat-fab-btn">💬</button>
     <div class="chat-window hidden" id="chat-window">
-        <div class="chat-header">Asistente Virtual</div>
+        <div class="chat-header">Asistente con IA (Gemini)</div>
         <div class="chat-messages" id="chat-messages"></div>
         <form class="chat-input-form" id="chat-form">
-            <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." autocomplete="off">
+            <input type="text" id="chat-input" placeholder="Pregúntale algo a la IA..." autocomplete="off">
             <button type="submit" id="chat-send-btn">➤</button>
         </form>
     </div>
-    
-    <audio id="pomodoro-alert-sound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
     <script>
+        // --- ¡ADVERTENCIA DE SEGURIDAD! ---
+        // NO subas este archivo a un repositorio público de GitHub con tu API Key.
+        // const GEMINI_API_KEY = "PEGA_AQUÍ_TU_API_KEY_DE_GEMINI";
+        const GEMINI_API_KEY = "AIzaSyBhQ_vB-2QlTgvca4Cp_UGkZ0kjMmWqgOo";
+
+
         document.addEventListener('DOMContentLoaded', () => {
-            // --- INICIALIZADORES GLOBALES ---
             document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
-            
             initDashboard();
             initPomodoro();
             initNotes();
-            initHabitTracker();
             setupScheduleListeners();
             setupTaskListeners();
             initChatbot();
 
-            // Cargar datos guardados de LocalStorage
             loadSchedule();
             loadTasks();
-            loadHabits();
         });
-
-        // --- MÓDULO DE NAVEGACIÓN ---
-        function handleNavClick(e) { 
-            e.preventDefault(); 
-            const targetId = e.currentTarget.getAttribute('href').substring(1); 
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); 
-            document.getElementById(targetId).classList.add('active'); 
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); 
-            e.currentTarget.classList.add('active'); 
-            // Actualizar el dashboard si se navega a él
-            if(targetId === 'inicio') {
-                updateNextClassDashboard();
-            }
-        }
-
-        // --- MÓDULO DEL DASHBOARD ---
-        function initDashboard() {
-            const motivationalQuotes = [ { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" } ];
-            const personalCareTips = [ "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.", "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.", "Tómate 5 minutos para estirarte entre largas sesiones de estudio.", "Asegúrate de dormir entre 7 y 9 horas." ];
-            const fashionTips = [ "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.", "El ajuste de la ropa es clave para un buen estilo.", "Limpia y cuida tus zapatos; son una parte importante de tu imagen." ];
-            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
-            document.getElementById('motivational-quote').textContent = randomQuote.text;
-            document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
-            renderRandomTips('personal-care-list', personalCareTips, 2);
-            renderRandomTips('fashion-tips-list', fashionTips, 2);
-            updateNextClassDashboard();
-        }
-
-        function renderRandomTips(elementId, tipsArray, count) { const listElement = document.getElementById(elementId); if (!listElement) return; listElement.innerHTML = ''; const shuffledTips = [...tipsArray].sort(() => 0.5 - Math.random()); const selectedTips = shuffledTips.slice(0, count); selectedTips.forEach(tipText => { const listItem = document.createElement('li'); listItem.textContent = tipText; listElement.appendChild(listItem); }); }
-
-        function updateNextClassDashboard() {
-            const listElement = document.getElementById('next-class-list');
-            if (!listElement) return;
-
-            const schedule = JSON.parse(localStorage.getItem('mySchedule')) || [];
-            if (schedule.length === 0) {
-                listElement.innerHTML = '<li>Añade tus clases en "Mi Horario".</li>';
-                return;
-            }
-
-            const now = new Date();
-            const dayOfWeek = now.getDay(); // 0=Dom, 1=Lun, ..., 6=Sab
-            const currentTime = now.toTimeString().slice(0, 5); // HH:MM
-            
-            const daysMap = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
-            const todayName = daysMap[dayOfWeek];
-
-            if (dayOfWeek === 0 || dayOfWeek === 6) {
-                listElement.innerHTML = '<li>¡Disfruta tu fin de semana!</li>';
-                return;
-            }
-
-            let nextClass = null;
-            
-            for (const row of schedule) {
-                const classInfo = row[todayName];
-                if (classInfo && classInfo.materia && classInfo.inicio > currentTime) {
-                    if (!nextClass || classInfo.inicio < nextClass.inicio) {
-                        nextClass = classInfo;
-                    }
-                }
-            }
-
-            if (nextClass) {
-                listElement.innerHTML = `<li><strong>Próxima clase:</strong> ${nextClass.materia} a las ${nextClass.inicio}</li>`;
-            } else {
-                listElement.innerHTML = '<li>No tienes más clases por hoy. ¡Buen trabajo!</li>';
-            }
-        }
-
-        // --- MÓDULO DE TAREAS ---
-        function setupTaskListeners() { 
-            document.getElementById('add-tarea-form').addEventListener('submit', addTask); 
-            const taskList = document.getElementById('lista-tareas');
-            taskList.addEventListener('click', (e) => {
-                if (e.target.matches('.btn-delete')) deleteTask(e);
-                if (e.target.matches('.task-checkbox')) toggleTaskCompletion(e);
-            });
-        }
-        function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
-        function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
         
-        function renderTasks(tasks) {
-            const taskList = document.getElementById('lista-tareas');
-            if(!taskList) return;
-            taskList.innerHTML = '';
-            tasks.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach((task, index) => {
-                const li = document.createElement('li');
-                li.className = `priority-${task.priority} ${task.completed ? 'completed' : ''}`;
-                li.dataset.index = index;
-
-                li.innerHTML = `
-                    <div class="task-content">
-                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
-                        <div class="task-details">
-                            <span class="task-description">${task.description}</span>
-                            <span class="task-date">Entrega: ${task.date}</span>
-                        </div>
-                    </div>
-                    <button class="btn btn-delete">X</button>
-                `;
-                taskList.appendChild(li);
-            });
-        }
-        
-        function addTask(event) { 
-            event.preventDefault(); 
-            const descInput = document.getElementById('task-description');
-            const dateInput = document.getElementById('task-date');
-            const priorityInput = document.getElementById('task-priority');
-            
-            const description = descInput.value.trim();
-            const date = dateInput.value;
-            const priority = priorityInput.value;
-            
-            if (!description || !date) { alert('Por favor, completa la descripción y la fecha.'); return; }
-            const tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            tasks.push({ description, date, priority, completed: false });
-            saveTasks(tasks);
-            event.target.reset(); 
-        }
-
-        function deleteTask(event) {
-            const index = parseInt(event.target.closest('li').dataset.index, 10);
-            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            tasks.splice(index, 1);
-            saveTasks(tasks);
-        }
-
-        function toggleTaskCompletion(event) {
-            const index = parseInt(event.target.closest('li').dataset.index, 10);
-            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            if(tasks[index]) {
-                tasks[index].completed = !tasks[index].completed;
-                localStorage.setItem('myTasks', JSON.stringify(tasks)); // Save without re-rendering to keep scroll position
-                event.target.closest('li').classList.toggle('completed');
-            }
-        }
-
-        // --- MÓDULO POMODORO ---
-        let pomodoroInterval; let timeLeft; let isPaused = true; let isWorkSession = true;
-        const workTimeInput = document.getElementById('pomodoro-work-time');
-        const breakTimeInput = document.getElementById('pomodoro-break-time');
-        const alertSound = document.getElementById('pomodoro-alert-sound');
-
-        function initPomodoro() {
-            if(!workTimeInput) return;
-            workTimeInput.value = localStorage.getItem('pomodoroWorkTime') || 25;
-            breakTimeInput.value = localStorage.getItem('pomodoroBreakTime') || 5;
-
-            document.getElementById('pomodoro-start').onclick = startTimer; 
-            document.getElementById('pomodoro-pause').onclick = pauseTimer; 
-            document.getElementById('pomodoro-reset').onclick = resetTimer;
-            workTimeInput.onchange = () => { localStorage.setItem('pomodoroWorkTime', workTimeInput.value); resetTimer(); };
-            breakTimeInput.onchange = () => { localStorage.setItem('pomodoroBreakTime', breakTimeInput.value); resetTimer(); };
-            resetTimer(false);
-        }
-        function updateTimerDisplay() { document.getElementById('pomodoro-time').textContent = `${Math.floor(timeLeft / 60).toString().padStart(2, '0')}:${(timeLeft % 60).toString().padStart(2, '0')}`; }
-        
-        function startTimer() { 
-            if (isPaused) { 
-                isPaused = false; 
-                pomodoroInterval = setInterval(() => { 
-                    timeLeft--; 
-                    updateTimerDisplay(); 
-                    if (timeLeft <= 0) { 
-                        clearInterval(pomodoroInterval); 
-                        alertSound.play();
-                        isWorkSession = !isWorkSession; 
-                        resetTimer(false);
-                        // Pequeña notificación visual en lugar del alert
-                        const modeText = document.getElementById('pomodoro-mode');
-                        const originalText = modeText.textContent;
-                        modeText.textContent = isWorkSession ? "¡A trabajar!" : "¡Descanso!";
-                        setTimeout(() => modeText.textContent = originalText, 5000);
-                    } 
-                }, 1000); 
-            } 
-        }
-
-        function pauseTimer() { isPaused = true; clearInterval(pomodoroInterval); }
-        
-        function resetTimer(manualReset = true) { 
-            pauseTimer(); 
-            if (manualReset) isWorkSession = true; 
-            const workMinutes = parseInt(workTimeInput.value, 10) || 25;
-            const breakMinutes = parseInt(breakTimeInput.value, 10) || 5;
-            timeLeft = isWorkSession ? workMinutes * 60 : breakMinutes * 60; 
-            document.getElementById('pomodoro-mode').textContent = isWorkSession ? "Tiempo de Enfoque" : "Descanso Breve"; 
-            isPaused = true; 
-            updateTimerDisplay(); 
-        }
-
-        // --- MÓDULO DE NOTAS RÁPIDAS ---
-        function initNotes() {
-            const notesArea = document.getElementById('quick-notes'); 
-            if(!notesArea) return; 
-            const notesStatus = document.getElementById('notes-status'); 
-            notesArea.value = localStorage.getItem('quickNotes') || ''; 
-            let saveTimeout; 
-            notesArea.addEventListener('keyup', () => { 
-                clearTimeout(saveTimeout); 
-                notesStatus.textContent = 'Escribiendo...'; 
-                saveTimeout = setTimeout(() => { 
-                    localStorage.setItem('quickNotes', notesArea.value); 
-                    notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`; 
-                }, 1000); 
-            }); 
-        }
-
-        // --- MÓDULO DE HORARIO ---
-        const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-        function setupScheduleListeners() { 
-            const editBtn = document.getElementById('edit-schedule-btn'); 
-            if(!editBtn) return; 
-            editBtn.addEventListener('click', editSchedule); 
-            document.getElementById('save-schedule-btn').addEventListener('click', saveSchedule); 
-            document.getElementById('add-row-btn').addEventListener('click', addScheduleRow); 
-        }
-        function loadSchedule(isEditing = false) { 
-            const scheduleBody = document.getElementById('schedule-body'); 
-            if(!scheduleBody) return; 
-            let data = JSON.parse(localStorage.getItem('mySchedule')) || [{}]; 
-            scheduleBody.innerHTML = ''; 
-            data.forEach((rowData, rowIndex) => { 
-                const row = document.createElement('tr'); 
-                days.forEach(day => row.appendChild(createScheduleCell(rowIndex, day, rowData[day] || {}, isEditing))); 
-                scheduleBody.appendChild(row); 
-            }); 
-        }
-        function createScheduleCell(rowIndex, day, data, isEditing) {
-            const c = document.createElement('td');
-            c.innerHTML = `
-            <div class="materia-cell ${isEditing ? 'edit-mode' : 'view-mode'}" data-row="${rowIndex}" data-day="${day}">
-                <div class="materia-display" style="background-color:${data.color || 'transparent'};">
-                    <span class="materia-name">${data.materia || '-'}</span>
-                    <span class="materia-time">${data.inicio && data.fin ? `${data.inicio} - ${data.fin}` : ''}</span>
-                </div>
-                <div class="materia-input-group">
-                    <input type="text" placeholder="Materia" class="materia-input" value="${data.materia || ''}">
-                    <input type="color" class="materia-color" value="${data.color || '#ffffff'}">
-                </div>
-                <div class="time-inputs">
-                    <input type="time" class="time-start" value="${data.inicio || ''}">
-                    <input type="time" class="time-end" value="${data.fin || ''}">
-                </div>
-            </div>`;
-            return c;
-        }
-        function editSchedule() { loadSchedule(true); toggleScheduleButtons(true); }
-        function saveSchedule() {
-            let data = [];
-            document.getElementById('schedule-body').querySelectorAll('tr').forEach(r => {
-                let rowData = {};
-                r.querySelectorAll('.materia-cell').forEach(c => {
-                    const day = c.getAttribute('data-day');
-                    rowData[day] = {
-                        inicio: c.querySelector('.time-start').value,
-                        fin: c.querySelector('.time-end').value,
-                        materia: c.querySelector('.materia-input').value.trim(),
-                        color: c.querySelector('.materia-color').value
-                    };
-                });
-                data.push(rowData);
-            });
-            localStorage.setItem('mySchedule', JSON.stringify(data));
-            loadSchedule(false);
-            toggleScheduleButtons(false);
-            updateNextClassDashboard(); // Actualizar dashboard tras guardar
-        }
-        function addScheduleRow() { const scheduleBody = document.getElementById('schedule-body'); const i = scheduleBody.rows.length; const r = document.createElement('tr'); days.forEach(d => r.appendChild(createScheduleCell(i, d, {}, true))); scheduleBody.appendChild(r); }
-        function toggleScheduleButtons(isEditing) { document.getElementById('edit-schedule-btn').classList.toggle('hidden', isEditing); document.getElementById('save-schedule-btn').classList.toggle('hidden', !isEditing); document.getElementById('add-row-btn').classList.toggle('hidden', !isEditing); }
-        
-        // --- MÓDULO SEGUIMIENTO DE HÁBITOS ---
-        function initHabitTracker() {
-            document.getElementById('add-habit-form').addEventListener('submit', addHabit);
-            document.getElementById('habit-tracker-grid').addEventListener('click', toggleHabitDay);
-        }
-
-        function loadHabits() { renderHabits(JSON.parse(localStorage.getItem('myHabits')) || []); }
-        function saveHabits(habits) { localStorage.setItem('myHabits', JSON.stringify(habits)); renderHabits(habits); }
-        
-        function renderHabits(habits) {
-            const grid = document.getElementById('habit-tracker-grid');
-            if (!grid) return;
-            const today = new Date();
-            const daysInWeek = 7;
-            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            
-            let headerHtml = '<div class="habit-name">Hábito</div>';
-            for (let i = 0; i < daysInWeek; i++) {
-                headerHtml += `<div>${dayNames[i]}</div>`;
-            }
-
-            let bodyHtml = habits.map((habit, habitIndex) => {
-                let row = `<div class="habit-name">${habit.name}</div>`;
-                for (let i = 0; i < daysInWeek; i++) {
-                    const date = new Date(today);
-                    date.setDate(date.getDate() - (today.getDay() - i + 7) % 7);
-                    const dateString = date.toISOString().split('T')[0];
-                    const isCompleted = habit.completed.includes(dateString);
-                    row += `<div class="habit-day ${isCompleted ? 'completed' : ''}" data-habit-index="${habitIndex}" data-date="${dateString}"></div>`;
-                }
-                return row;
-            }).join('');
-
-            grid.style.gridTemplateColumns = `2fr repeat(${daysInWeek}, 1fr)`;
-            grid.innerHTML = `<div class="habit-row">${headerHtml}${bodyHtml}</div>`;
-        }
-
-        function addHabit(event) {
-            event.preventDefault();
-            const input = document.getElementById('new-habit-input');
-            const name = input.value.trim();
-            if (name) {
-                const habits = JSON.parse(localStorage.getItem('myHabits')) || [];
-                habits.push({ name: name, completed: [] });
-                saveHabits(habits);
-                input.value = '';
-            }
-        }
-        
-        function toggleHabitDay(event) {
-            if (event.target.classList.contains('habit-day')) {
-                const { habitIndex, date } = event.target.dataset;
-                const habits = JSON.parse(localStorage.getItem('myHabits')) || [];
-                const habit = habits[habitIndex];
-                const dateIndex = habit.completed.indexOf(date);
-                if (dateIndex > -1) {
-                    habit.completed.splice(dateIndex, 1);
-                } else {
-                    habit.completed.push(date);
-                }
-                localStorage.setItem('myHabits', JSON.stringify(habits)); // Guardar sin re-renderizar para UX
-                event.target.classList.toggle('completed');
-            }
-        }
-
-        // --- MÓDULO DEL CHATBOT ---
+        // --- LÓGICA DEL CHATBOT (CONECTADO A GEMINI AI) ---
         function initChatbot() {
             const fabBtn = document.getElementById('chat-fab-btn');
             const chatWindow = document.getElementById('chat-window');
@@ -601,55 +438,118 @@
 
             fabBtn.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
 
-            chatForm.addEventListener('submit', (e) => {
+            chatForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const userMessage = chatInput.value.trim();
                 if (userMessage === '') return;
-                addMessageToChat(userMessage, 'user');
+
+                addMessage(userMessage, 'user');
                 chatInput.value = '';
-                setTimeout(() => {
-                    const botResponse = getBotResponse(userMessage);
-                    addMessageToChat(botResponse, 'bot');
-                }, 700);
+                addMessage("Pensando...", 'bot-loading');
+
+                const botResponse = await getAIResponse(userMessage);
+                
+                const loadingMessage = document.querySelector('.bot-loading-message');
+                if(loadingMessage) loadingMessage.remove();
+
+                addMessage(botResponse, 'bot');
             });
 
-            addMessageToChat('¡Hola! Soy tu asistente. Pregúntame sobre "tareas", "horario" o pide un "consejo".', 'bot');
-        }
-
-        function addMessageToChat(text, sender) {
-            const chatMessages = document.getElementById('chat-messages');
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message', `${sender}-message`);
-            messageElement.textContent = text;
-            chatMessages.appendChild(messageElement);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function getBotResponse(userInput) {
-            const text = userInput.toLowerCase();
-            
-            // Regla de acción: Añadir tarea
-            if (text.startsWith("añade la tarea") || text.startsWith("recuérdame")) {
-                const taskDescription = userInput.substring(userInput.indexOf(' ') + 1);
-                document.querySelector('.nav-link[href="#tareas"]').click();
-                const taskInput = document.getElementById('task-description');
-                taskInput.value = taskDescription.charAt(0).toUpperCase() + taskDescription.slice(1);
-                taskInput.focus();
-                return `Claro, he anotado "${taskDescription}" en el formulario. Por favor, añade la fecha de entrega y la prioridad.`;
+            function addMessage(text, type) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', `${type}-message`);
+                messageElement.textContent = text;
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             
-            const rules = [ { keywords: ['hola', 'hey', 'saludos', 'buenos dias'], responses: ['¡Hola! Espero que tengas un excelente día. ¿En qué puedo ayudarte?', '¡Hey! ¿Qué tal? Listo para ayudarte.', '¡Buen día! ¿Qué necesitas?'] }, { keywords: ['tarea', 'deberes', 'pendiente'], responses: ['Puedes gestionar tus tareas en la sección "Tareas Pendientes". ¡No olvides poner una fecha de entrega!', 'Para añadir una nueva tarea, ve a la sección correspondiente en el menú. ¿Necesitas ayuda con algo más?', 'Revisa la pestaña de Tareas para ver lo que tienes pendiente. ¡La organización es clave!'] }, { keywords: ['horario', 'clase', 'materia'], responses: ['Tu horario de clases semanal está en la sección "Mi Horario". Puedes modificarlo cuando quieras.', '¿Quieres saber qué clase tienes ahora? Consulta el Dashboard o la sección "Mi Horario".', 'Toda la información de tus clases está en la pestaña de Horario. ¿Te gustaría que te diera un consejo de estudio?'] }, { keywords: ['examen', 'estudiar', 'prueba'], responses: ['Para prepararte para un examen, te recomiendo usar el Temporizador Pomodoro para enfocarte. ¡25 minutos de estudio y 5 de descanso!', 'Recuerda que en la sección "Notas Rápidas" puedes guardar enlaces a recursos de estudio importantes.', '¡Mucha suerte en tu examen! Una buena noche de sueño antes es tan importante como estudiar.'] }, { keywords: ['consejo', 'tip', 'ayuda', 'estrés'], responses: ['Claro, un consejo: divide una tarea grande en partes más pequeñas. Se sentirá menos abrumador.', 'Recuerda tomar descansos regulares y mantenerte hidratado. En el Dashboard encontrarás más tips de bienestar cada día.', 'Si te sientes estresado, una breve caminata o escuchar tu música favorita puede hacer una gran diferencia.'] }, { keywords: ['gracias', 'adios', 'chao', 'nos vemos'], responses: ['¡De nada! Estoy aquí si me necesitas. ¡Mucho éxito!', 'Ha sido un placer ayudarte. ¡Que tengas un gran día!', '¡Nos vemos! Sigue así de organizado.'] } ];
-            for (const rule of rules) { for (const keyword of rule.keywords) { if (text.includes(keyword)) { return rule.responses[Math.floor(Math.random() * rule.responses.length)]; } } }
-            
-            return "No estoy seguro de entender. Intenta preguntarme sobre 'tareas', 'horario' o 'estudiar'.";
+            addMessage('¡Hola! Estoy conectado a la IA de Google. ¿En qué puedo ayudarte?', 'bot');
         }
 
-        // --- CÓDIGO PARA MANEJAR EVENTOS DE LOGIN/LOGOUT DE NETLIFY ---
+        async function getAIResponse(userInput) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "PEGA_AQUÍ_TU_API_KEY_DE_GEMINI") {
+                return "Error: La API Key de Gemini no está configurada.";
+            }
+
+            const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+            const requestBody = { "contents": [ { "parts": [ { "text": `Eres un asistente virtual para un estudiante de preparatoria. Sé amigable, conciso y útil. Responde a la siguiente pregunta: ${userInput}` } ] } ] };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error de la API:", errorData);
+                    return `Lo siento, hubo un error con la API: ${errorData.error.message}`;
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0]) {
+                    return data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    console.error("Respuesta inesperada de la API:", data);
+                    return "Lo siento, recibí una respuesta inesperada de la IA.";
+                }
+            } catch (error) {
+                console.error("Error en la conexión:", error);
+                return "Lo siento, no pude conectarme al servicio de IA. Revisa tu conexión a internet o la consola de errores (F12).";
+            }
+        }
+
+        // --- LÓGICA DE LA APP PRINCIPAL ---
+        function handleNavClick(e) { e.preventDefault(); const targetId = e.currentTarget.getAttribute('href').substring(1); document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(targetId).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); e.currentTarget.classList.add('active'); }
+        function initDashboard() {
+            const motivationalQuotes = [ { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" } ];
+            const personalCareTips = [ "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.", "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.", "Tómate 5 minutos para estirarte entre largas sesiones de estudio.", "Asegúrate de dormir entre 7 y 9 horas." ];
+            const fashionTips = [ "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.", "El ajuste de la ropa es clave para un buen estilo.", "Limpia y cuida tus zapatos; son una parte importante de tu imagen." ];
+            const healthTips = [ "Una manzana es un snack energético y saludable, ideal para media tarde.", "Intenta comer al menos 5 porciones de frutas y verduras al día.", "Si pasas mucho tiempo sentado, levántate y camina un poco cada hora." ];
+            const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
+            document.getElementById('motivational-quote').textContent = randomQuote.text;
+            document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
+            renderRandomTips('personal-care-list', personalCareTips, 2);
+            renderRandomTips('fashion-tips-list', fashionTips, 2);
+            renderRandomTips('health-tips-list', healthTips, 2);
+        }
+        function renderRandomTips(elementId, tipsArray, count) { const listElement = document.getElementById(elementId); if (!listElement) return; listElement.innerHTML = ''; const shuffledTips = tipsArray.sort(() => 0.5 - Math.random()); const selectedTips = shuffledTips.slice(0, count); selectedTips.forEach(tipText => { const listItem = document.createElement('li'); listItem.textContent = tipText; listElement.appendChild(listItem); }); }
+        function setupTaskListeners() { document.getElementById('add-tarea-form').addEventListener('submit', addTask); document.getElementById('lista-tareas').addEventListener('click', deleteTask); }
+        function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
+        function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
+        function renderTasks(tasks) { const taskList = document.getElementById('lista-tareas'); if(!taskList) return; taskList.innerHTML = ''; tasks.forEach((task, index) => { const li = document.createElement('li'); const taskDetails = document.createElement('div'); taskDetails.className = 'task-details'; const taskDesc = document.createElement('span'); taskDesc.className = 'task-description'; taskDesc.textContent = task.description; const taskDate = document.createElement('span'); taskDate.className = 'task-date'; taskDate.textContent = `Entrega: ${task.date}`; taskDetails.appendChild(taskDesc); taskDetails.appendChild(taskDate); const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn btn-delete'; deleteBtn.textContent = 'X'; deleteBtn.dataset.index = index; li.appendChild(taskDetails); li.appendChild(deleteBtn); taskList.appendChild(li); }); }
+        function addTask(event) { event.preventDefault(); const descInput = document.getElementById('task-description'); const dateInput = document.getElementById('task-date'); const description = descInput.value.trim(); const date = dateInput.value; if (!description || !date) { alert('Por favor, completa la descripción y la fecha.'); return; } const tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.push({ description, date }); saveTasks(tasks); event.target.reset(); }
+        function deleteTask(event) { if (event.target.matches('.btn-delete')) { const index = parseInt(event.target.dataset.index, 10); let tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.splice(index, 1); saveTasks(tasks); } }
+        let pomodoroInterval; let timeLeft = 1500; let isPaused = true; let isWorkSession = true;
+        function initPomodoro() { const pStart = document.getElementById('pomodoro-start'); if(!pStart) return; pStart.onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
+        function updateTimerDisplay() { const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60; document.getElementById('pomodoro-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; }
+        function startTimer() { if (isPaused) { isPaused = false; pomodoroInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) { clearInterval(pomodoroInterval); isWorkSession = !isWorkSession; alert(isWorkSession ? "¡Descanso terminado! Es hora de enfocarse." : "¡Buen trabajo! Tomate un breve descanso."); resetTimer(false); } }, 1000); } }
+        function pauseTimer() { isPaused = true; clearInterval(pomodoroInterval); }
+        function resetTimer(manualReset = true) { pauseTimer(); if (manualReset) isWorkSession = true; timeLeft = isWorkSession ? 1500 : 300; document.getElementById('pomodoro-mode').textContent = isWorkSession ? "Tiempo de Enfoque" : "Descanso Breve"; isPaused = true; updateTimerDisplay(); }
+        function initNotes() { const notesArea = document.getElementById('quick-notes'); if(!notesArea) return; const notesStatus = document.getElementById('notes-status'); notesArea.value = localStorage.getItem('quickNotes') || ''; let saveTimeout; notesArea.addEventListener('keyup', () => { clearTimeout(saveTimeout); notesStatus.textContent = 'Escribiendo...'; saveTimeout = setTimeout(() => { localStorage.setItem('quickNotes', notesArea.value); notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`; }, 1000); }); }
+        const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
+        function setupScheduleListeners() { const editBtn = document.getElementById('edit-schedule-btn'); if(!editBtn) return; editBtn.addEventListener('click', editSchedule); document.getElementById('save-schedule-btn').addEventListener('click', saveSchedule); document.getElementById('add-row-btn').addEventListener('click', addScheduleRow); }
+        function loadSchedule(isEditing = false) { const scheduleBody = document.getElementById('schedule-body'); if(!scheduleBody) return; let data = JSON.parse(localStorage.getItem('mySchedule')) || [{}]; scheduleBody.innerHTML = ''; data.forEach((rowData, rowIndex) => { const row = document.createElement('tr'); days.forEach(day => row.appendChild(createScheduleCell(rowIndex, day, rowData[day] || {}, isEditing))); scheduleBody.appendChild(row); }); }
+        function createScheduleCell(rowIndex, day, data, isEditing) { const c = document.createElement('td'); c.innerHTML = `<div class="materia-cell ${isEditing ? 'e' : 'view-'}mode" data-row="${rowIndex}" data-day="${day}"><div class="materia-display"><span class="materia-name">${data.materia || '-'}</span><span class="materia-time">${data.inicio && data.fin ? `${data.inicio} - ${data.fin}` : ''}</span></div><div class="time-inputs"><input type="time" class="time-start" value="${data.inicio}"><input type="time" class="time-end" value="${data.fin}"></div><input type="text" placeholder="Materia" class="materia-input" value="${data.materia}"></div>`; return c; }
+        function editSchedule() { loadSchedule(true); toggleScheduleButtons(true); }
+        function saveSchedule() { let data = []; document.getElementById('schedule-body').querySelectorAll('tr').forEach(r => { let rowData = {}; r.querySelectorAll('.materia-cell').forEach(c => { const day = c.getAttribute('data-day'); rowData[day] = { inicio: c.querySelector('.time-start').value, fin: c.querySelector('.time-end').value, materia: c.querySelector('.materia-input').value.trim() }; }); data.push(rowData); }); localStorage.setItem('mySchedule', JSON.stringify(data)); loadSchedule(false); toggleScheduleButtons(false); }
+        function addScheduleRow() { const scheduleBody = document.getElementById('schedule-body'); const i = scheduleBody.rows.length; const r = document.createElement('tr'); days.forEach(d => r.appendChild(createScheduleCell(i, d, {}, true))); scheduleBody.appendChild(r); }
+        function toggleScheduleButtons(isEditing) { document.getElementById('edit-schedule-btn').classList.toggle('hidden', isEditing); document.getElementById('save-schedule-btn').classList.toggle('hidden', !isEditing); document.getElementById('add-row-btn').classList.toggle('hidden', !isEditing); }
+        
+        // CÓDIGO PARA MANEJAR EVENTOS DE LOGIN/LOGOUT DE NETLIFY
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
-                if (!user) { window.netlifyIdentity.on("login", () => { document.location.href = "/"; }); }
+                if (!user) {
+                    window.netlifyIdentity.on("login", () => {
+                        document.location.href = "/";
+                    });
+                }
             });
-            window.netlifyIdentity.on("logout", () => { document.location.href = "/"; });
+             window.netlifyIdentity.on("logout", () => {
+                document.location.href = "/";
+            });
         }
     </script>
 </body>
