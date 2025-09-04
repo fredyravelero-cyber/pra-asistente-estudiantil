@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRA Asistente Estudiantil</title>
+    <title>PRA Asistente Estudiantil (con Gemini AI)</title>
+    
+    <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     
     <style>
         /* --- ESTILOS GENERALES Y VARIABLES --- */
@@ -81,6 +83,25 @@
         .nav-item a:hover, .nav-item a.active {
             background-color: var(--pra-lightblue);
         }
+
+        /* --- ESTILOS PARA EL WIDGET DE NETLIFY IDENTITY --- */
+        [data-netlify-identity-menu] {
+            margin-top: auto; /* Empuja los botones al final de la barra lateral */
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .netlify-identity-button { /* Estilo para los botones de Login/Signup/Logout */
+            background-color: var(--pra-lightblue) !important;
+            border-radius: 8px !important;
+            padding: 10px !important;
+            font-weight: 600 !important;
+            color: white !important;
+            border: none !important;
+            text-align: center !important;
+            display: block !important;
+            width: 100%;
+            margin-bottom: 10px !important;
+        }
         
         .main-content {
             flex-grow: 1;
@@ -136,7 +157,7 @@
             line-height: 1.4;
         }
         .tips-card li::before {
-            content: '✨'; /* Puedes cambiar el emoji aquí */
+            content: '✨';
             position: absolute;
             left: 0;
             top: 0;
@@ -180,31 +201,138 @@
             padding: 15px; background-color: #f9f9f9; border-radius: 6px;
             margin-bottom: 10px; border-left: 5px solid var(--pra-lightblue);
             display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+            flex-wrap: wrap;
         }
         .task-details { display: flex; flex-direction: column; flex-grow: 1; margin-right: 15px; }
         .task-description { font-weight: 600; }
         .task-date { font-size: 0.9rem; color: #555; }
-        .task-actions { display: flex; align-items: center; margin-top: 10px; } /* Contenedor para botones de tarea */
-        .task-file-info { font-size: 0.85rem; color: var(--pra-blue); font-style: italic; margin-right: 15px; } /* Mover a la izquierda */
+        .task-file-info {
+            font-size: 0.85rem;
+            color: var(--pra-blue);
+            font-style: italic;
+            margin-top: 5px;
+        }
         
         .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
         .btn-primary { background-color: var(--pra-lightblue); color: var(--text-light); }
         .btn-edit { background-color: var(--warning); color: var(--text-light); }
-        .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; }
+        .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; margin-left: auto; }
         .btn-add-row { background-color: var(--success); color: white; }
-        .btn-open-folder { background-color: #607D8B; color: white; padding: 8px 12px; } /* Nuevo botón */
 
-        /* Responsive */
+        /* --- ESTILOS DEL CHATBOT --- */
+        .chat-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background-color: var(--pra-blue);
+            color: white;
+            border-radius: 50%;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        .chat-fab:hover { transform: scale(1.1); }
+        .chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 350px;
+            max-width: 90%;
+            height: 450px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform-origin: bottom right;
+            z-index: 999;
+        }
+        .chat-window.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
+        .chat-header {
+            background: var(--pra-blue);
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .chat-messages {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+        }
+        .bot-message {
+            background: var(--background-grey);
+            color: var(--text-dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .user-message {
+            background: var(--pra-lightblue);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+        .bot-loading-message {
+            background: var(--background-grey);
+            color: #999;
+            font-style: italic;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-input-form {
+            display: flex;
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+        }
+        #chat-input {
+            flex-grow: 1;
+            border: none;
+            padding: 10px;
+            font-size: 1rem;
+            outline: none;
+        }
+        #chat-send-btn {
+            background: none;
+            border: none;
+            color: var(--pra-lightblue);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        /* --- RESPONSIVE --- */
         @media (max-width: 768px) {
+            #app-container { flex-direction: column; }
             .sidebar { width: 100%; height: auto; position: relative; }
             .main-content { padding: 20px; }
             .dashboard-grid { grid-template-columns: 1fr; }
             #add-tarea-form { grid-template-columns: 1fr; }
             .btn { width: 100%; margin-top: 10px; margin-right: 0; }
             #lista-tareas li { flex-direction: column; align-items: flex-start; }
-            .task-actions { margin-left: 0; margin-top: 10px; width: 100%; justify-content: flex-end; }
-            .task-file-info { margin-bottom: 10px; margin-right: 0; }
+            .task-actions { margin-left: auto; margin-top: 10px; }
         }
     </style>
 </head>
@@ -212,10 +340,7 @@
 
     <div id="app-container">
         <nav class="sidebar">
-            <div class="sidebar-header">
-                <h1>PRA</h1>
-                <span>Asistente Estudiantil</span>
-            </div>
+            <div class="sidebar-header"><h1>PRA</h1><span>Asistente Estudiantil</span></div>
             <ul class="nav-menu">
                 <li class="nav-item"><a href="#inicio" class="nav-link active">Inicio</a></li>
                 <li class="nav-item"><a href="#horario" class="nav-link">Mi Horario</a></li>
@@ -223,8 +348,8 @@
                 <li class="nav-item"><a href="#pomodoro" class="nav-link">Enfoque Pomodoro</a></li>
                 <li class="nav-item"><a href="#notas" class="nav-link">Notas Rápidas</a></li>
             </ul>
+            <div data-netlify-identity-menu></div>
         </nav>
-
         <main class="main-content">
             <section id="inicio" class="content-section active">
                 <h2 class="page-header">Dashboard</h2>
@@ -234,278 +359,199 @@
                         <blockquote id="motivational-quote"></blockquote>
                         <cite id="quote-author"></cite>
                     </div>
-                    
                     <div class="card tips-card personal-care-card">
                         <h3>Tips de Cuidado Personal</h3>
                         <ul id="personal-care-list"></ul>
                     </div>
-
                     <div class="card tips-card moda-card">
                         <h3>Tips de Moda y Estilo</h3>
                         <ul id="fashion-tips-list"></ul>
                     </div>
-
                     <div class="card tips-card salud-card">
                         <h3>Tips de Salud y Alimentación</h3>
                         <ul id="health-tips-list"></ul>
                     </div>
                 </div>
             </section>
-
-            <section id="horario" class="content-section"></section>
-            <section id="tareas" class="content-section"></section>
-            <section id="pomodoro" class="content-section"></section>
-            <section id="notas" class="content-section"></section>
+            <section id="horario" class="content-section">
+                <h2 class="page-header">Mi Horario Semanal</h2>
+                <div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div>
+                <div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>
+            </section>
+            <section id="tareas" class="content-section">
+                <h2 class="page-header">Tareas Pendientes</h2>
+                <form id="add-tarea-form">
+                    <input type="text" id="task-description" placeholder="Descripción..." required>
+                    <input type="date" id="task-date" required>
+                    <input type="file" id="task-file">
+                    <button type="submit" class="btn btn-primary">Agregar</button>
+                </form>
+                <ul id="lista-tareas"></ul>
+            </section>
+            <section id="pomodoro" class="content-section">
+                <h2 class="page-header">Temporizador Pomodoro</h2>
+                <div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>
+            </section>
+            <section id="notas" class="content-section">
+                <h2 class="page-header">Bloc de Notas y Recursos</h2>
+                <div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>
+            </section>
         </main>
+    </div>
+    
+    <button class="chat-fab" id="chat-fab-btn">💬</button>
+    <div class="chat-window hidden" id="chat-window">
+        <div class="chat-header">Asistente con IA (Gemini)</div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <form class="chat-input-form" id="chat-form">
+            <input type="text" id="chat-input" placeholder="Pregúntale algo a la IA..." autocomplete="off">
+            <button type="submit" id="chat-send-btn">➤</button>
+        </form>
     </div>
 
     <script>
+        // --- ¡ADVERTENCIA DE SEGURIDAD! ---
+        // Este código es solo para pruebas en tu computadora local.
+        // NO subas este archivo a un repositorio público de GitHub con tu API Key.
+        const GEMINI_API_KEY = "AIzaSyBhQ_vB-2QlTgvca4Cp_UGkZ0kjMmWqgOo";
+
         document.addEventListener('DOMContentLoaded', () => {
-            loadStaticContent();
+            // Inicializadores principales
             document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
-            
             initDashboard();
             initPomodoro();
             initNotes();
             setupScheduleListeners();
             setupTaskListeners();
+            initChatbot();
+
+            // Cargar datos guardados
             loadSchedule();
             loadTasks();
         });
+        
+        // --- LÓGICA DEL CHATBOT (CONECTADO A GEMINI AI) ---
+        function initChatbot() {
+            const fabBtn = document.getElementById('chat-fab-btn');
+            const chatWindow = document.getElementById('chat-window');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const chatMessages = document.getElementById('chat-messages');
 
-        // --- LÓGICA DEL DASHBOARD (CONTENIDO ALEATORIO Y NUEVAS SECCIONES) ---
+            fabBtn.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
+
+            chatForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userMessage = chatInput.value.trim();
+                if (userMessage === '') return;
+
+                addMessage(userMessage, 'user');
+                chatInput.value = '';
+                addMessage("Pensando...", 'bot-loading');
+
+                const botResponse = await getAIResponse(userMessage);
+                
+                const loadingMessage = document.querySelector('.bot-loading-message');
+                if(loadingMessage) loadingMessage.remove();
+
+                addMessage(botResponse, 'bot');
+            });
+
+            function addMessage(text, type) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', `${type}-message`);
+                messageElement.textContent = text;
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            addMessage('¡Hola! Estoy conectado a la IA de Google. ¿En qué puedo ayudarte?', 'bot');
+        }
+
+        async function getAIResponse(userInput) {
+            if (!GEMINI_API_KEY || GEMINI_API_KEY === "PEGA_TU_API_KEY_AQUÍ") {
+                return "Error: La API Key de Gemini no está configurada. Por favor, añádela en la variable GEMINI_API_KEY al principio del script.";
+            }
+
+            const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + GEMINI_API_KEY;
+            const requestBody = { "contents": [ { "parts": [ { "text": `Eres un asistente virtual para un estudiante de preparatoria. Sé amigable, conciso y útil. Responde a la siguiente pregunta: ${userInput}` } ] } ] };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Error de la API:", errorData);
+                    return `Lo siento, hubo un error con la API: ${errorData.error.message}`;
+                }
+
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0]) {
+                    return data.candidates[0].content.parts[0].text.trim();
+                } else {
+                    console.error("Respuesta inesperada de la API:", data);
+                    return "Lo siento, recibí una respuesta inesperada de la IA.";
+                }
+            } catch (error) {
+                console.error("Error en la conexión:", error);
+                return "Lo siento, no pude conectarme al servicio de IA. Revisa tu conexión a internet o la consola de errores (F12).";
+            }
+        }
+
+        // --- LÓGICA DE LA APP PRINCIPAL (RESTO DE FUNCIONES) ---
+        function handleNavClick(e) { e.preventDefault(); const targetId = e.currentTarget.getAttribute('href').substring(1); document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(targetId).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); e.currentTarget.classList.add('active'); }
         function initDashboard() {
-            // Biblioteca de Frases Motivacionales
-            const motivationalQuotes = [
-                { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" },
-                { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" },
-                { text: "No tienes que ser grande para empezar, pero tienes que empezar para ser grande.", author: "Zig Ziglar" },
-                { text: "El secreto para salir adelante es empezar.", author: "Mark Twain" },
-                { text: "Cree que puedes y ya estás a medio camino.", author: "Theodore Roosevelt" },
-                { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" },
-                { text: "La mejor forma de predecir el futuro es crearlo.", author: "Peter Drucker" }
-            ];
-
-            // Biblioteca de Tips de Cuidado Personal (Más expandida)
-            const personalCareTips = [
-                "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.",
-                "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.",
-                "Tómate 5 minutos para estirarte entre largas sesiones de estudio. Tu espalda te lo agradecerá.",
-                "Asegúrate de dormir entre 7 y 9 horas. Un buen descanso es clave para aprender.",
-                "Limpia tu rostro cada noche para mantener tu piel sana y fresca.",
-                "Dedica 15 minutos al día a organizar tu espacio de estudio. Un lugar ordenado ayuda a una mente ordenada.",
-                "Practica la respiración profunda por unos minutos para reducir el estrés.",
-                "Establece una rutina de sueño. Acostarte y levantarte a la misma hora mejora tu energía.",
-                "Usa bloqueador solar, incluso en días nublados o si pasas mucho tiempo cerca de ventanas.",
-                "Tómate un descanso de las pantallas cada 20-30 minutos para cuidar tu vista."
-            ];
-
-            // Biblioteca de Tips de Moda y Estilo (Nueva)
-            const fashionTips = [
-                "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.",
-                "Asegúrate de que tu ropa te quede bien. El ajuste es clave para un buen estilo.",
-                "Usa accesorios para darle un toque diferente a un outfit simple: un reloj, un cinturón o un collar.",
-                "Limpia y cuida tus zapatos; son una parte importante de tu imagen.",
-                "Mezcla texturas en tus atuendos para añadir interés visual (ej. un suéter de punto con jeans).",
-                "Ten siempre un 'look comodín' listo para esos días sin inspiración: jeans, camiseta, blazer.",
-                "No subestimes el poder de una buena plancha o vaporizador para tu ropa."
-            ];
-
-            // Biblioteca de Tips de Salud y Alimentación (Nueva)
-            const healthTips = [
-                "Una manzana es un snack energético y saludable, ideal para media tarde.",
-                "Intenta comer al menos 5 porciones de frutas y verduras al día.",
-                "Para dolores de cabeza leves, asegúrate de estar bien hidratado antes de recurrir a medicamentos.",
-                "Si pasas mucho tiempo sentado, levántate y camina un poco cada hora para activar la circulación.",
-                "Sustituye las bebidas azucaradas por agua o infusiones naturales.",
-                "Para la fatiga, prioriza alimentos ricos en hierro como espinacas o lentejas.",
-                "Escucha a tu cuerpo: si tienes dolor, no lo ignores. Descansa y, si persiste, consulta a un médico.",
-                "Evita cenar muy pesado antes de dormir para mejorar la calidad de tu sueño.",
-                "Un puñado de nueces o almendras es perfecto para satisfacer el hambre entre comidas."
-            ];
-
-
-            // --- Lógica para seleccionar y mostrar contenido aleatorio ---
-
-            // 1. Dosis de Motivación
+            const motivationalQuotes = [ { text: "El éxito es la suma de pequeños esfuerzos repetidos día tras día.", author: "Robert Collier" }, { text: "La disciplina es el puente entre las metas y los logros.", author: "Jim Rohn" }, { text: "El futuro pertenece a quienes creen en la belleza de sus sueños.", author: "Eleanor Roosevelt" } ];
+            const personalCareTips = [ "Prepara tu ropa y mochila la noche anterior para una mañana sin estrés.", "Mantén una botella de agua en tu escritorio. Hidratarse mejora la concentración.", "Tómate 5 minutos para estirarte entre largas sesiones de estudio.", "Asegúrate de dormir entre 7 y 9 horas." ];
+            const fashionTips = [ "Invierte en básicos de calidad: jeans, camisas blancas y camisetas de colores neutros.", "El ajuste de la ropa es clave para un buen estilo.", "Limpia y cuida tus zapatos; son una parte importante de tu imagen." ];
+            const healthTips = [ "Una manzana es un snack energético y saludable, ideal para media tarde.", "Intenta comer al menos 5 porciones de frutas y verduras al día.", "Si pasas mucho tiempo sentado, levántate y camina un poco cada hora." ];
             const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
             document.getElementById('motivational-quote').textContent = randomQuote.text;
             document.getElementById('quote-author').textContent = `- ${randomQuote.author}`;
-
-            // 2. Tips de Cuidado Personal (seleccionamos 3 diferentes)
-            renderRandomTips('personal-care-list', personalCareTips, 3);
-
-            // 3. Tips de Moda y Estilo (seleccionamos 3 diferentes)
-            renderRandomTips('fashion-tips-list', fashionTips, 3);
-
-            // 4. Tips de Salud y Alimentación (seleccionamos 3 diferentes)
-            renderRandomTips('health-tips-list', healthTips, 3);
+            renderRandomTips('personal-care-list', personalCareTips, 2);
+            renderRandomTips('fashion-tips-list', fashionTips, 2);
+            renderRandomTips('health-tips-list', healthTips, 2);
         }
-
-        // Función auxiliar para renderizar tips aleatorios
-        function renderRandomTips(elementId, tipsArray, count) {
-            const listElement = document.getElementById(elementId);
-            listElement.innerHTML = '';
-            const shuffledTips = tipsArray.sort(() => 0.5 - Math.random());
-            const selectedTips = shuffledTips.slice(0, count);
-            selectedTips.forEach(tipText => {
-                const listItem = document.createElement('li');
-                listItem.textContent = tipText;
-                listElement.appendChild(listItem);
-            });
-        }
-
-
-        // --- LÓGICA DE NAVEGACIÓN Y OTRAS FUNCIONES (ACTUALIZADAS PARA ARCHIVOS) ---
-        function handleNavClick(e) { e.preventDefault(); const targetId = e.currentTarget.getAttribute('href').substring(1); document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active')); document.getElementById(targetId).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); e.currentTarget.classList.add('active'); }
-        
-        function setupTaskListeners() {
-            document.getElementById('add-tarea-form').addEventListener('submit', addTask);
-            // Delegamos el evento de clic a la lista de tareas para botones dinámicos
-            document.getElementById('lista-tareas').addEventListener('click', handleTaskActions); 
-        }
-
-        function handleTaskActions(event) {
-            if (event.target.matches('.btn-delete')) {
-                deleteTask(event);
-            } else if (event.target.matches('.btn-open-folder')) {
-                openFileLocation(event);
-            }
-        }
-
+        function renderRandomTips(elementId, tipsArray, count) { const listElement = document.getElementById(elementId); if (!listElement) return; listElement.innerHTML = ''; const shuffledTips = tipsArray.sort(() => 0.5 - Math.random()); const selectedTips = shuffledTips.slice(0, count); selectedTips.forEach(tipText => { const listItem = document.createElement('li'); listItem.textContent = tipText; listElement.appendChild(listItem); }); }
+        function setupTaskListeners() { document.getElementById('add-tarea-form').addEventListener('submit', addTask); document.getElementById('lista-tareas').addEventListener('click', deleteTask); }
         function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
         function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
-        
-        // FUNCIÓN ACTUALIZADA para mostrar el botón "Abrir Carpeta"
-        function renderTasks(tasks) {
-            const taskList = document.getElementById('lista-tareas');
-            taskList.innerHTML = '';
-            tasks.forEach((task, index) => {
-                const li = document.createElement('li');
-
-                // Contenedor para la descripción, fecha y archivo
-                const taskDetails = document.createElement('div');
-                taskDetails.className = 'task-details';
-
-                const taskDesc = document.createElement('span');
-                taskDesc.className = 'task-description';
-                taskDesc.textContent = task.description;
-                
-                const taskDate = document.createElement('span');
-                taskDate.className = 'task-date';
-                taskDate.textContent = `Entrega: ${task.date}`;
-
-                taskDetails.appendChild(taskDesc);
-                taskDetails.appendChild(taskDate);
-
-                // Contenedor para los botones de la tarea
-                const taskActions = document.createElement('div');
-                taskActions.className = 'task-actions';
-
-                // Si la tarea tiene un nombre de archivo, mostramos su info y el botón "Abrir Carpeta"
-                if (task.fileName) {
-                    const taskFile = document.createElement('span');
-                    taskFile.className = 'task-file-info';
-                    taskFile.textContent = `📎 Archivo: ${task.fileName}`;
-                    taskActions.appendChild(taskFile); // Añadimos al contenedor de acciones
-                    
-                    const openFolderBtn = document.createElement('button');
-                    openFolderBtn.className = 'btn btn-open-folder';
-                    openFolderBtn.textContent = 'Abrir Carpeta';
-                    openFolderBtn.dataset.index = index; // Para saber a qué tarea pertenece
-                    taskActions.appendChild(openFolderBtn);
-                }
-
-                // Botón de eliminar
-                const deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn btn-delete';
-                deleteBtn.textContent = 'X';
-                deleteBtn.dataset.index = index;
-                taskActions.appendChild(deleteBtn); // Añadimos al contenedor de acciones
-
-                li.appendChild(taskDetails);
-                li.appendChild(taskActions); // Añadimos el contenedor de acciones completo
-                taskList.appendChild(li);
-            });
-        }
-        
-        function addTask(event) {
-            event.preventDefault();
-            const descriptionInput = document.getElementById('task-description');
-            const dateInput = document.getElementById('task-date');
-            const fileInput = document.getElementById('task-file');
-
-            const description = descriptionInput.value.trim();
-            const date = dateInput.value;
-
-            if (!description || !date) {
-                alert('Por favor, completa la descripción y la fecha.');
-                return;
-            }
-            
-            const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null;
-            // Opcional: Podrías guardar la ruta completa si el usuario la selecciona de alguna manera
-            // Sin embargo, por seguridad y limitaciones del navegador, la ruta real es inaccesible
-            // Así que solo guardamos el nombre.
-            // La funcionalidad de "Abrir Carpeta" dependerá de la capacidad del sistema operativo.
-            // Para un sitio web, este es el límite.
-            // Para una aplicación de escritorio/Electron, sí se podría hacer.
-
-            const tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            tasks.push({ description, date, fileName });
-            saveTasks(tasks);
-            
-            event.target.reset();
-        }
-
-        function deleteTask(event) {
-            const index = parseInt(event.target.dataset.index, 10);
-            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            tasks.splice(index, 1);
-            saveTasks(tasks);
-        }
-
-        function openFileLocation(event) {
-            const index = parseInt(event.target.dataset.index, 10);
-            let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-            const task = tasks[index];
-
-            if (task && task.fileName) {
-                // Esta es una LIMITACIÓN CRÍTICA en navegadores web por seguridad.
-                // JavaScript en un navegador NO PUEDE abrir una carpeta local directamente.
-                // No puede acceder a rutas de archivo en el sistema del usuario.
-                
-                // Opción 1 (la única viable en web): Mostrar un mensaje.
-                alert(`Para esta tarea, buscaste el archivo:\n\n"${task.fileName}"\n\nDebes abrir manualmente la carpeta donde lo guardaste.`);
-
-                // Opción 2 (solo funcionaría en entornos de escritorio como Electron, NO en un navegador web):
-                // window.electron.openFileExplorer(task.filePath); // Ejemplo de una API en Electron
-            } else {
-                alert("No hay un archivo adjunto para esta tarea.");
-            }
-        }
-        
-        // --- RESTO DE FUNCIONES (sin cambios) ---
+        function renderTasks(tasks) { const taskList = document.getElementById('lista-tareas'); if(!taskList) return; taskList.innerHTML = ''; tasks.forEach((task, index) => { const li = document.createElement('li'); const taskDetails = document.createElement('div'); taskDetails.className = 'task-details'; const taskDesc = document.createElement('span'); taskDesc.className = 'task-description'; taskDesc.textContent = task.description; const taskDate = document.createElement('span'); taskDate.className = 'task-date'; taskDate.textContent = `Entrega: ${task.date}`; taskDetails.appendChild(taskDesc); taskDetails.appendChild(taskDate); if (task.fileName) { const taskFile = document.createElement('span'); taskFile.className = 'task-file-info'; taskFile.textContent = `📎 Archivo: ${task.fileName}`; taskDetails.appendChild(taskFile); } const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn btn-delete'; deleteBtn.textContent = 'X'; deleteBtn.dataset.index = index; li.appendChild(taskDetails); li.appendChild(deleteBtn); taskList.appendChild(li); }); }
+        function addTask(event) { event.preventDefault(); const descInput = document.getElementById('task-description'); const dateInput = document.getElementById('task-date'); const fileInput = document.getElementById('task-file'); const description = descInput.value.trim(); const date = dateInput.value; if (!description || !date) { alert('Por favor, completa la descripción y la fecha.'); return; } const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null; const tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.push({ description, date, fileName }); saveTasks(tasks); event.target.reset(); }
+        function deleteTask(event) { if (event.target.matches('.btn-delete')) { const index = parseInt(event.target.dataset.index, 10); let tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.splice(index, 1); saveTasks(tasks); } }
         let pomodoroInterval; let timeLeft = 1500; let isPaused = true; let isWorkSession = true;
-        function initPomodoro() { document.getElementById('pomodoro-start').onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
+        function initPomodoro() { const pStart = document.getElementById('pomodoro-start'); if(!pStart) return; pStart.onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
         function updateTimerDisplay() { const minutes = Math.floor(timeLeft / 60); const seconds = timeLeft % 60; document.getElementById('pomodoro-time').textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; }
         function startTimer() { if (isPaused) { isPaused = false; pomodoroInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); if (timeLeft <= 0) { clearInterval(pomodoroInterval); isWorkSession = !isWorkSession; alert(isWorkSession ? "¡Descanso terminado! Es hora de enfocarse." : "¡Buen trabajo! Tomate un breve descanso."); resetTimer(false); } }, 1000); } }
         function pauseTimer() { isPaused = true; clearInterval(pomodoroInterval); }
         function resetTimer(manualReset = true) { pauseTimer(); if (manualReset) isWorkSession = true; timeLeft = isWorkSession ? 1500 : 300; document.getElementById('pomodoro-mode').textContent = isWorkSession ? "Tiempo de Enfoque" : "Descanso Breve"; isPaused = true; updateTimerDisplay(); }
-        function initNotes() { const notesArea = document.getElementById('quick-notes'); const notesStatus = document.getElementById('notes-status'); notesArea.value = localStorage.getItem('quickNotes') || ''; let saveTimeout; notesArea.addEventListener('keyup', () => { clearTimeout(saveTimeout); notesStatus.textContent = 'Escribiendo...'; saveTimeout = setTimeout(() => { localStorage.setItem('quickNotes', notesArea.value); notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`; }, 1000); }); }
+        function initNotes() { const notesArea = document.getElementById('quick-notes'); if(!notesArea) return; const notesStatus = document.getElementById('notes-status'); notesArea.value = localStorage.getItem('quickNotes') || ''; let saveTimeout; notesArea.addEventListener('keyup', () => { clearTimeout(saveTimeout); notesStatus.textContent = 'Escribiendo...'; saveTimeout = setTimeout(() => { localStorage.setItem('quickNotes', notesArea.value); notesStatus.textContent = `Guardado a las ${new Date().toLocaleTimeString()}`; }, 1000); }); }
         const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'];
-        function setupScheduleListeners() { document.getElementById('edit-schedule-btn').addEventListener('click', editSchedule); document.getElementById('save-schedule-btn').addEventListener('click', saveSchedule); document.getElementById('add-row-btn').addEventListener('click', addScheduleRow); }
-        function loadSchedule(isEditing = false) { const scheduleBody = document.getElementById('schedule-body'); let data = JSON.parse(localStorage.getItem('mySchedule')) || [{}]; scheduleBody.innerHTML = ''; data.forEach((rowData, rowIndex) => { const row = document.createElement('tr'); days.forEach(day => row.appendChild(createScheduleCell(rowIndex, day, rowData[day] || {}, isEditing))); scheduleBody.appendChild(row); }); }
+        function setupScheduleListeners() { const editBtn = document.getElementById('edit-schedule-btn'); if(!editBtn) return; editBtn.addEventListener('click', editSchedule); document.getElementById('save-schedule-btn').addEventListener('click', saveSchedule); document.getElementById('add-row-btn').addEventListener('click', addScheduleRow); }
+        function loadSchedule(isEditing = false) { const scheduleBody = document.getElementById('schedule-body'); if(!scheduleBody) return; let data = JSON.parse(localStorage.getItem('mySchedule')) || [{}]; scheduleBody.innerHTML = ''; data.forEach((rowData, rowIndex) => { const row = document.createElement('tr'); days.forEach(day => row.appendChild(createScheduleCell(rowIndex, day, rowData[day] || {}, isEditing))); scheduleBody.appendChild(row); }); }
         function createScheduleCell(rowIndex, day, data, isEditing) { const c = document.createElement('td'); c.innerHTML = `<div class="materia-cell ${isEditing ? 'e' : 'view-'}mode" data-row="${rowIndex}" data-day="${day}"><div class="materia-display"><span class="materia-name">${data.materia || '-'}</span><span class="materia-time">${data.inicio && data.fin ? `${data.inicio} - ${data.fin}` : ''}</span></div><div class="time-inputs"><input type="time" class="time-start" value="${data.inicio}"><input type="time" class="time-end" value="${data.fin}"></div><input type="text" placeholder="Materia" class="materia-input" value="${data.materia}"></div>`; return c; }
         function editSchedule() { loadSchedule(true); toggleScheduleButtons(true); }
         function saveSchedule() { let data = []; document.getElementById('schedule-body').querySelectorAll('tr').forEach(r => { let rowData = {}; r.querySelectorAll('.materia-cell').forEach(c => { const day = c.getAttribute('data-day'); rowData[day] = { inicio: c.querySelector('.time-start').value, fin: c.querySelector('.time-end').value, materia: c.querySelector('.materia-input').value.trim() }; }); data.push(rowData); }); localStorage.setItem('mySchedule', JSON.stringify(data)); loadSchedule(false); toggleScheduleButtons(false); }
         function addScheduleRow() { const scheduleBody = document.getElementById('schedule-body'); const i = scheduleBody.rows.length; const r = document.createElement('tr'); days.forEach(d => r.appendChild(createScheduleCell(i, d, {}, true))); scheduleBody.appendChild(r); }
         function toggleScheduleButtons(isEditing) { document.getElementById('edit-schedule-btn').classList.toggle('hidden', isEditing); document.getElementById('save-schedule-btn').classList.toggle('hidden', !isEditing); document.getElementById('add-row-btn').classList.toggle('hidden', !isEditing); }
-        function loadStaticContent(){
-            document.getElementById('horario').innerHTML = `<h2 class="page-header">Mi Horario Semanal</h2><div class="schedule-table-wrapper"><table class="schedule-table"><thead><tr><th>Lunes</th><th>Martes</th><th>Miércoles</th><th>Jueves</th><th>Viernes</th></tr></thead><tbody id="schedule-body"></tbody></table></div><div class="schedule-controls"><button id="edit-schedule-btn" class="btn btn-edit">Modificar</button><button id="save-schedule-btn" class="btn btn-primary hidden">Guardar</button><button id="add-row-btn" class="btn btn-add-row hidden">Añadir Fila</button></div>`;
-            document.getElementById('tareas').innerHTML = `<h2 class="page-header">Tareas Pendientes</h2><form id="add-tarea-form"><input type="text" id="task-description" placeholder="Descripción..." required><input type="date" id="task-date" required><input type="file" id="task-file"><button type="submit" class="btn btn-primary">Agregar</button></form><ul id="lista-tareas"></ul>`;
-            document.getElementById('pomodoro').innerHTML = `<h2 class="page-header">Temporizador Pomodoro</h2><div class="card pomodoro-card"><h3 id="pomodoro-mode">Tiempo de Enfoque</h3><div id="pomodoro-time">25:00</div><div class="pomodoro-controls"><button id="pomodoro-start" class="btn btn-primary">Iniciar</button><button id="pomodoro-pause" class="btn btn-edit">Pausar</button><button id="pomodoro-reset" class="btn btn-delete">Reiniciar</button></div></div>`;
-            document.getElementById('notas').innerHTML = `<h2 class="page-header">Bloc de Notas y Recursos</h2><div class="card"><textarea id="quick-notes" placeholder="Escribe tus apuntes, ideas o pega enlaces..."></textarea><p id="notes-status"></p></div>`;
+        
+        // CÓDIGO PARA MANEJAR EVENTOS DE LOGIN/LOGOUT DE NETLIFY
+        if (window.netlifyIdentity) {
+            window.netlifyIdentity.on("init", user => {
+                if (!user) {
+                    window.netlifyIdentity.on("login", () => {
+                        document.location.href = "/";
+                    });
+                }
+            });
+             window.netlifyIdentity.on("logout", () => {
+                document.location.href = "/";
+            });
         }
     </script>
 </body>
