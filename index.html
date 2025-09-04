@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PRA Asistente Estudiantil (con Gemini AI)</title>
+    <title>PRA Asistente Estudiantil</title>
     
     <script type="text/javascript" src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-    
+
     <style>
         /* --- ESTILOS GENERALES Y VARIABLES --- */
         :root {
@@ -33,7 +33,7 @@
             overflow-x: hidden;
         }
 
-        /* --- LAYOUT PRINCIPAL (SIDEBAR + CONTENT) --- */
+        /* --- LAYOUT PRINCIPAL --- */
         #app-container {
             display: flex;
             min-height: 100vh;
@@ -46,7 +46,6 @@
             padding: 20px;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease-in-out;
         }
 
         .sidebar-header {
@@ -83,7 +82,7 @@
         .nav-item a:hover, .nav-item a.active {
             background-color: var(--pra-lightblue);
         }
-
+        
         /* --- ESTILOS PARA EL WIDGET DE NETLIFY IDENTITY --- */
         [data-netlify-identity-menu] {
             margin-top: auto; /* Empuja los botones al final de la barra lateral */
@@ -114,226 +113,53 @@
         .hidden { display: none !important; }
 
         /* --- ESTILOS DE COMPONENTES --- */
-        .page-header {
-            margin-bottom: 25px;
-            color: var(--pra-blue);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px var(--shadow);
-        }
+        .page-header { margin-bottom: 25px; color: var(--pra-blue); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px var(--shadow); }
         .card h3 { margin-top: 0; color: var(--pra-blue); }
-        .quote-card blockquote {
-            font-size: 1.2rem;
-            font-style: italic;
-            margin: 0;
-            border-left: 4px solid var(--pra-lightblue);
-            padding-left: 15px;
-        }
-        .quote-card cite {
-            display: block;
-            text-align: right;
-            margin-top: 10px;
-            font-weight: 500;
-        }
-
-        .tips-card ul {
-            list-style: none;
-            padding: 0;
-        }
-        .tips-card li {
-            margin-bottom: 12px;
-            padding-left: 25px;
-            position: relative;
-            line-height: 1.4;
-        }
-        .tips-card li::before {
-            content: '✨';
-            position: absolute;
-            left: 0;
-            top: 0;
-        }
-        .moda-card li::before { content: '👗'; }
-        .salud-card li::before { content: '🍎'; }
-
-
-        .pomodoro-card { text-align: center; }
-        #pomodoro-time { font-size: 4rem; font-weight: 600; margin: 15px 0; }
+        .quote-card blockquote { font-size: 1.2rem; font-style: italic; margin: 0; border-left: 4px solid var(--pra-lightblue); padding-left: 15px; }
+        .quote-card cite { display: block; text-align: right; margin-top: 10px; font-weight: 500; }
+        .tips-card ul { list-style: none; padding: 0; }
+        .tips-card li { margin-bottom: 12px; padding-left: 25px; position: relative; line-height: 1.4; }
+        .tips-card li::before { content: '✨'; position: absolute; left: 0; top: 0; }
+        .moda-card li::before { content: '👗'; } .salud-card li::before { content: '🍎'; }
+        .pomodoro-card { text-align: center; } #pomodoro-time { font-size: 4rem; font-weight: 600; margin: 15px 0; }
         #quick-notes { width: 100%; height: 200px; padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; font-family: inherit; font-size: 1rem; resize: vertical; }
-        .schedule-table-wrapper { overflow-x: auto; }
-        .schedule-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .schedule-table-wrapper { overflow-x: auto; } .schedule-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         .schedule-table th, .schedule-table td { border: 1px solid var(--border-color); padding: 8px; text-align: center; vertical-align: middle; }
         .schedule-table th { background-color: var(--background-grey); }
-        .materia-cell { padding: 5px; min-height: 60px; }
-        .materia-cell input { width: calc(100% - 16px); margin-bottom: 5px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        .materia-cell { padding: 5px; min-height: 60px; } .materia-cell input { width: calc(100% - 16px); margin-bottom: 5px; padding: 6px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         .materia-cell .time-inputs { display: flex; gap: 5px; }
         .materia-cell.view-mode .time-inputs, .materia-cell.view-mode input[placeholder="Materia"] { display: none; }
-        .materia-cell .materia-display { display: none; }
-        .materia-cell.view-mode .materia-display { display: block; font-weight: 500; }
+        .materia-cell .materia-display { display: none; } .materia-cell.view-mode .materia-display { display: block; font-weight: 500; }
         .materia-display .materia-time { font-size: 0.85rem; color: #555; display: block; }
-        
-        #add-tarea-form {
-            display: grid;
-            grid-template-columns: 1fr auto auto;
-            gap: 15px;
-            margin-bottom: 25px;
-            align-items: center;
-        }
-        #add-tarea-form input {
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-        #task-file { padding: 9px; font-size: 0.9rem; }
-
+        #add-tarea-form { display: flex; gap: 15px; margin-bottom: 25px; align-items: center; }
+        #add-tarea-form input[type="text"] { flex-grow: 1; }
+        #add-tarea-form input { padding: 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
         #lista-tareas { list-style: none; padding: 0; }
-        #lista-tareas li {
-            padding: 15px; background-color: #f9f9f9; border-radius: 6px;
-            margin-bottom: 10px; border-left: 5px solid var(--pra-lightblue);
-            display: flex; justify-content: space-between; align-items: center;
-            flex-wrap: wrap;
-        }
+        #lista-tareas li { padding: 15px; background-color: #f9f9f9; border-radius: 6px; margin-bottom: 10px; border-left: 5px solid var(--pra-lightblue); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
         .task-details { display: flex; flex-direction: column; flex-grow: 1; margin-right: 15px; }
         .task-description { font-weight: 600; }
         .task-date { font-size: 0.9rem; color: #555; }
-        .task-file-info {
-            font-size: 0.85rem;
-            color: var(--pra-blue);
-            font-style: italic;
-            margin-top: 5px;
-        }
-        
         .btn { padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s ease; margin-right: 10px; }
         .btn-primary { background-color: var(--pra-lightblue); color: var(--text-light); }
-        .btn-edit { background-color: var(--warning); color: var(--text-light); }
         .btn-delete { background-color: var(--danger); color: white; padding: 8px 12px; margin-left: auto; }
-        .btn-add-row { background-color: var(--success); color: white; }
-
+        
         /* --- ESTILOS DEL CHATBOT --- */
-        .chat-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            background-color: var(--pra-blue);
-            color: white;
-            border-radius: 50%;
-            border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            cursor: pointer;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2rem;
-            transition: transform 0.3s ease;
-            z-index: 1000;
-        }
-        .chat-fab:hover { transform: scale(1.1); }
-        .chat-window {
-            position: fixed;
-            bottom: 100px;
-            right: 30px;
-            width: 350px;
-            max-width: 90%;
-            height: 450px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            transform-origin: bottom right;
-            z-index: 999;
-        }
-        .chat-window.hidden {
-            transform: scale(0);
-            opacity: 0;
-        }
-        .chat-header {
-            background: var(--pra-blue);
-            color: white;
-            padding: 15px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .chat-messages {
-            flex-grow: 1;
-            padding: 15px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-        .message {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 18px;
-            margin-bottom: 10px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-        }
-        .bot-message {
-            background: var(--background-grey);
-            color: var(--text-dark);
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-        .user-message {
-            background: var(--pra-lightblue);
-            color: white;
-            align-self: flex-end;
-            border-bottom-right-radius: 4px;
-        }
-        .bot-loading-message {
-            background: var(--background-grey);
-            color: #999;
-            font-style: italic;
-            align-self: flex-start;
-            border-bottom-left-radius: 4px;
-        }
-        .chat-input-form {
-            display: flex;
-            border-top: 1px solid var(--border-color);
-            padding: 10px;
-        }
-        #chat-input {
-            flex-grow: 1;
-            border: none;
-            padding: 10px;
-            font-size: 1rem;
-            outline: none;
-        }
-        #chat-send-btn {
-            background: none;
-            border: none;
-            color: var(--pra-lightblue);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 0 10px;
-        }
-
+        .chat-fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; background-color: var(--pra-blue); color: white; border-radius: 50%; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 2rem; transition: transform 0.3s ease; z-index: 1000; }
+        .chat-window { position: fixed; bottom: 100px; right: 30px; width: 350px; max-width: 90%; height: 450px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.3s ease, transform 0.3s ease; transform-origin: bottom right; z-index: 999; }
+        .chat-window.hidden { transform: scale(0); opacity: 0; }
+        .chat-header { background: var(--pra-blue); color: white; padding: 15px; font-weight: bold; text-align: center; }
+        .chat-messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; }
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 18px; margin-bottom: 10px; line-height: 1.4; white-space: pre-wrap; }
+        .bot-message { background: var(--background-grey); color: var(--text-dark); align-self: flex-start; border-bottom-left-radius: 4px; }
+        .user-message { background: var(--pra-lightblue); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .chat-input-form { display: flex; border-top: 1px solid var(--border-color); padding: 10px; }
+        #chat-input { flex-grow: 1; border: none; padding: 10px; font-size: 1rem; outline: none; }
+        #chat-send-btn { background: none; border: none; color: var(--pra-lightblue); font-size: 1.5rem; cursor: pointer; padding: 0 10px; }
+        
         /* --- RESPONSIVE --- */
-        @media (max-width: 768px) {
-            #app-container { flex-direction: column; }
-            .sidebar { width: 100%; height: auto; position: relative; }
-            .main-content { padding: 20px; }
-            .dashboard-grid { grid-template-columns: 1fr; }
-            #add-tarea-form { grid-template-columns: 1fr; }
-            .btn { width: 100%; margin-top: 10px; margin-right: 0; }
-            #lista-tareas li { flex-direction: column; align-items: flex-start; }
-            .task-actions { margin-left: auto; margin-top: 10px; }
-        }
+        @media (max-width: 768px) { #app-container { flex-direction: column; } .sidebar { width: 100%; height: auto; position: relative; } .main-content { padding: 20px; } .dashboard-grid { grid-template-columns: 1fr; } #add-tarea-form { flex-direction:column; align-items: stretch; } .btn { width: 100%; margin-top: 10px; margin-right: 0; } #lista-tareas li { flex-direction: column; align-items: flex-start; } }
     </style>
 </head>
 <body>
@@ -381,9 +207,8 @@
             <section id="tareas" class="content-section">
                 <h2 class="page-header">Tareas Pendientes</h2>
                 <form id="add-tarea-form">
-                    <input type="text" id="task-description" placeholder="Descripción..." required>
+                    <input type="text" id="task-description" placeholder="Descripción de la tarea..." required>
                     <input type="date" id="task-date" required>
-                    <input type="file" id="task-file">
                     <button type="submit" class="btn btn-primary">Agregar</button>
                 </form>
                 <ul id="lista-tareas"></ul>
@@ -401,20 +226,15 @@
     
     <button class="chat-fab" id="chat-fab-btn">💬</button>
     <div class="chat-window hidden" id="chat-window">
-        <div class="chat-header">Asistente con IA (Gemini)</div>
+        <div class="chat-header">Asistente Virtual</div>
         <div class="chat-messages" id="chat-messages"></div>
         <form class="chat-input-form" id="chat-form">
-            <input type="text" id="chat-input" placeholder="Pregúntale algo a la IA..." autocomplete="off">
+            <input type="text" id="chat-input" placeholder="Escribe tu pregunta..." autocomplete="off">
             <button type="submit" id="chat-send-btn">➤</button>
         </form>
     </div>
 
     <script>
-        // --- ¡ADVERTENCIA DE SEGURIDAD! ---
-        // Este código es solo para pruebas en tu computadora local.
-        // NO subas este archivo a un repositorio público de GitHub con tu API Key.
-        const GEMINI_API_KEY = "AIzaSyBhQ_vB-2QlTgvca4Cp_UGkZ0kjMmWqgOo";
-
         document.addEventListener('DOMContentLoaded', () => {
             // Inicializadores principales
             document.querySelectorAll('.nav-link').forEach(link => link.addEventListener('click', handleNavClick));
@@ -430,7 +250,7 @@
             loadTasks();
         });
         
-        // --- LÓGICA DEL CHATBOT (CONECTADO A GEMINI AI) ---
+        // --- LÓGICA DEL CHATBOT (Basado en Reglas) ---
         function initChatbot() {
             const fabBtn = document.getElementById('chat-fab-btn');
             const chatWindow = document.getElementById('chat-window');
@@ -440,67 +260,34 @@
 
             fabBtn.addEventListener('click', () => chatWindow.classList.toggle('hidden'));
 
-            chatForm.addEventListener('submit', async (e) => {
+            chatForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const userMessage = chatInput.value.trim();
                 if (userMessage === '') return;
-
                 addMessage(userMessage, 'user');
                 chatInput.value = '';
-                addMessage("Pensando...", 'bot-loading');
-
-                const botResponse = await getAIResponse(userMessage);
-                
-                const loadingMessage = document.querySelector('.bot-loading-message');
-                if(loadingMessage) loadingMessage.remove();
-
-                addMessage(botResponse, 'bot');
+                setTimeout(() => {
+                    const botResponse = getBotResponse(userMessage);
+                    addMessage(botResponse, 'bot');
+                }, 700);
             });
 
-            function addMessage(text, type) {
+            function addMessage(text, sender) {
                 const messageElement = document.createElement('div');
-                messageElement.classList.add('message', `${type}-message`);
+                messageElement.classList.add('message', `${sender}-message`);
                 messageElement.textContent = text;
                 chatMessages.appendChild(messageElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
-            
-            addMessage('¡Hola! Estoy conectado a la IA de Google. ¿En qué puedo ayudarte?', 'bot');
-        }
 
-        async function getAIResponse(userInput) {
-            if (!GEMINI_API_KEY || GEMINI_API_KEY === "PEGA_TU_API_KEY_AQUÍ") {
-                return "Error: La API Key de Gemini no está configurada. Por favor, añádela en la variable GEMINI_API_KEY al principio del script.";
+            function getBotResponse(userInput) {
+                const text = userInput.toLowerCase();
+                const rules = [ { keywords: ['hola', 'hey', 'saludos', 'buenos dias'], responses: ['¡Hola! Espero que tengas un excelente día. ¿En qué puedo ayudarte?', '¡Hey! ¿Qué tal? Listo para ayudarte.', '¡Buen día! ¿Qué necesitas?'] }, { keywords: ['tarea', 'deberes', 'pendiente'], responses: ['Puedes gestionar tus tareas en la sección "Tareas Pendientes". ¡No olvides poner una fecha de entrega!', 'Para añadir una nueva tarea, ve a la sección correspondiente en el menú. ¿Necesitas ayuda con algo más?', 'Revisa la pestaña de Tareas para ver lo que tienes pendiente. ¡La organización es clave!'] }, { keywords: ['horario', 'clase', 'materia'], responses: ['Tu horario de clases semanal está en la sección "Mi Horario". Puedes modificarlo cuando quieras.', '¿Quieres saber qué clase tienes ahora? Consulta la sección "Mi Horario".', 'Toda la información de tus clases está en la pestaña de Horario. ¿Te gustaría que te diera un consejo de estudio?'] }, { keywords: ['examen', 'estudiar', 'prueba'], responses: ['Para prepararte para un examen, te recomiendo usar el Temporizador Pomodoro para enfocarte. ¡25 minutos de estudio y 5 de descanso!', 'Recuerda que en la sección "Notas Rápidas" puedes guardar enlaces a recursos de estudio importantes.', '¡Mucha suerte en tu examen! Una buena noche de sueño antes es tan importante como estudiar.'] }, { keywords: ['consejo', 'tip', 'ayuda', 'estrés'], responses: ['Claro, un consejo: divide una tarea grande en partes más pequeñas. Se sentirá menos abrumador.', 'Recuerda tomar descansos regulares y mantenerte hidratado. En el Dashboard encontrarás más tips de bienestar cada día.', 'Si te sientes estresado, una breve caminata o escuchar tu música favorita puede hacer una gran diferencia.'] }, { keywords: ['gracias', 'adios', 'chao', 'nos vemos'], responses: ['¡De nada! Estoy aquí si me necesitas. ¡Mucho éxito!', 'Ha sido un placer ayudarte. ¡Que tengas un gran día!', '¡Nos vemos! Sigue así de organizado.'] } ];
+                for (const rule of rules) { for (const keyword of rule.keywords) { if (text.includes(keyword)) { const randomIndex = Math.floor(Math.random() * rule.responses.length); return rule.responses[randomIndex]; } } }
+                const defaultResponses = ["No estoy seguro de entender. Intenta preguntarme sobre 'tareas', 'horario' o 'estudiar'.", "Vaya, eso es algo nuevo para mí. ¿Puedes intentar reformular tu pregunta?", "Mi programación actual no cubre esa pregunta. Puedo ayudarte con temas de estudio, organización y consejos."];
+                return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
             }
-
-            const API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=" + GEMINI_API_KEY;
-            const requestBody = { "contents": [ { "parts": [ { "text": `Eres un asistente virtual para un estudiante de preparatoria. Sé amigable, conciso y útil. Responde a la siguiente pregunta: ${userInput}` } ] } ] };
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error("Error de la API:", errorData);
-                    return `Lo siento, hubo un error con la API: ${errorData.error.message}`;
-                }
-
-                const data = await response.json();
-                
-                if (data.candidates && data.candidates[0] && data.candidates[0].content.parts[0]) {
-                    return data.candidates[0].content.parts[0].text.trim();
-                } else {
-                    console.error("Respuesta inesperada de la API:", data);
-                    return "Lo siento, recibí una respuesta inesperada de la IA.";
-                }
-            } catch (error) {
-                console.error("Error en la conexión:", error);
-                return "Lo siento, no pude conectarme al servicio de IA. Revisa tu conexión a internet o la consola de errores (F12).";
-            }
+            addMessage('¡Hola! Soy tu asistente virtual. Pregúntame sobre "tareas", "horario" o pide un "consejo".', 'bot');
         }
 
         // --- LÓGICA DE LA APP PRINCIPAL (RESTO DE FUNCIONES) ---
@@ -521,8 +308,8 @@
         function setupTaskListeners() { document.getElementById('add-tarea-form').addEventListener('submit', addTask); document.getElementById('lista-tareas').addEventListener('click', deleteTask); }
         function loadTasks() { renderTasks(JSON.parse(localStorage.getItem('myTasks')) || []); }
         function saveTasks(tasks) { localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(tasks); }
-        function renderTasks(tasks) { const taskList = document.getElementById('lista-tareas'); if(!taskList) return; taskList.innerHTML = ''; tasks.forEach((task, index) => { const li = document.createElement('li'); const taskDetails = document.createElement('div'); taskDetails.className = 'task-details'; const taskDesc = document.createElement('span'); taskDesc.className = 'task-description'; taskDesc.textContent = task.description; const taskDate = document.createElement('span'); taskDate.className = 'task-date'; taskDate.textContent = `Entrega: ${task.date}`; taskDetails.appendChild(taskDesc); taskDetails.appendChild(taskDate); if (task.fileName) { const taskFile = document.createElement('span'); taskFile.className = 'task-file-info'; taskFile.textContent = `📎 Archivo: ${task.fileName}`; taskDetails.appendChild(taskFile); } const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn btn-delete'; deleteBtn.textContent = 'X'; deleteBtn.dataset.index = index; li.appendChild(taskDetails); li.appendChild(deleteBtn); taskList.appendChild(li); }); }
-        function addTask(event) { event.preventDefault(); const descInput = document.getElementById('task-description'); const dateInput = document.getElementById('task-date'); const fileInput = document.getElementById('task-file'); const description = descInput.value.trim(); const date = dateInput.value; if (!description || !date) { alert('Por favor, completa la descripción y la fecha.'); return; } const fileName = fileInput.files.length > 0 ? fileInput.files[0].name : null; const tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.push({ description, date, fileName }); saveTasks(tasks); event.target.reset(); }
+        function renderTasks(tasks) { const taskList = document.getElementById('lista-tareas'); if(!taskList) return; taskList.innerHTML = ''; tasks.forEach((task, index) => { const li = document.createElement('li'); const taskDetails = document.createElement('div'); taskDetails.className = 'task-details'; const taskDesc = document.createElement('span'); taskDesc.className = 'task-description'; taskDesc.textContent = task.description; const taskDate = document.createElement('span'); taskDate.className = 'task-date'; taskDate.textContent = `Entrega: ${task.date}`; taskDetails.appendChild(taskDesc); taskDetails.appendChild(taskDate); const deleteBtn = document.createElement('button'); deleteBtn.className = 'btn btn-delete'; deleteBtn.textContent = 'X'; deleteBtn.dataset.index = index; li.appendChild(taskDetails); li.appendChild(deleteBtn); taskList.appendChild(li); }); }
+        function addTask(event) { event.preventDefault(); const descInput = document.getElementById('task-description'); const dateInput = document.getElementById('task-date'); const description = descInput.value.trim(); const date = dateInput.value; if (!description || !date) { alert('Por favor, completa la descripción y la fecha.'); return; } const tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.push({ description, date }); saveTasks(tasks); event.target.reset(); }
         function deleteTask(event) { if (event.target.matches('.btn-delete')) { const index = parseInt(event.target.dataset.index, 10); let tasks = JSON.parse(localStorage.getItem('myTasks')) || []; tasks.splice(index, 1); saveTasks(tasks); } }
         let pomodoroInterval; let timeLeft = 1500; let isPaused = true; let isWorkSession = true;
         function initPomodoro() { const pStart = document.getElementById('pomodoro-start'); if(!pStart) return; pStart.onclick = startTimer; document.getElementById('pomodoro-pause').onclick = pauseTimer; document.getElementById('pomodoro-reset').onclick = resetTimer; }
@@ -540,7 +327,7 @@
         function addScheduleRow() { const scheduleBody = document.getElementById('schedule-body'); const i = scheduleBody.rows.length; const r = document.createElement('tr'); days.forEach(d => r.appendChild(createScheduleCell(i, d, {}, true))); scheduleBody.appendChild(r); }
         function toggleScheduleButtons(isEditing) { document.getElementById('edit-schedule-btn').classList.toggle('hidden', isEditing); document.getElementById('save-schedule-btn').classList.toggle('hidden', !isEditing); document.getElementById('add-row-btn').classList.toggle('hidden', !isEditing); }
         
-        // CÓDIGO PARA MANEJAR EVENTOS DE LOGIN/LOGOUT DE NETLIFY
+        // --- CÓDIGO PARA MANEJAR EVENTOS DE LOGIN/LOGOUT DE NETLIFY ---
         if (window.netlifyIdentity) {
             window.netlifyIdentity.on("init", user => {
                 if (!user) {
